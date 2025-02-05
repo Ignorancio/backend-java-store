@@ -1,18 +1,55 @@
 package com.example.store.controller;
 
 
+import com.example.store.dtos.ProductRequest;
+import com.example.store.dtos.ProductResponse;
+import com.example.store.dtos.ProductUpdateRequest;
+import com.example.store.service.ProductService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/products")
 @RequiredArgsConstructor
 public class ProductController {
 
-    @GetMapping("/public")
-    public String getPublic() {
-        return "Public API";
+    private final ProductService productService;
+
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductResponse> getProductById(@PathVariable Long id) {
+        ProductResponse product = productService.getProduct(id);
+        if(product == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(product);
+    }
+    @GetMapping("/")
+    public ResponseEntity<List<ProductResponse>> getProducts() {
+        return ResponseEntity.ok(productService.getProducts());
+    }
+    @PostMapping("/")
+    public ResponseEntity<ProductResponse> createProduct(@RequestBody ProductRequest product) {
+        ProductResponse productSaved = productService.createProduct(product);
+        return ResponseEntity.ok(productSaved);
+    }
+    @PutMapping("/")
+    public ResponseEntity<ProductResponse> updateProduct(@RequestBody ProductUpdateRequest product) {
+        ProductResponse productSaved = productService.updateProduct(product);
+        if(productSaved == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(productSaved);
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ProductResponse> deleteProduct(@PathVariable Long id) {
+        ProductResponse product = productService.deleteProduct(id);
+        if(product == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(product);
     }
 }
