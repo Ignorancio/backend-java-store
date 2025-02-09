@@ -55,7 +55,6 @@ public class AuthService {
     }
 
     public TokenResponse refreshToken(@NonNull final String authentication) {
-
         if (!authentication.startsWith("Bearer ")) {
             throw new IllegalArgumentException("Invalid auth header");
         }
