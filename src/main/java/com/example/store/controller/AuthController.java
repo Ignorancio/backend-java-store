@@ -4,6 +4,7 @@ import com.example.store.dtos.AuthRequest;
 import com.example.store.dtos.RegisterRequest;
 import com.example.store.dtos.TokenResponse;
 import com.example.store.service.AuthService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -17,13 +18,13 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<TokenResponse> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<TokenResponse> register(@Valid @RequestBody RegisterRequest request) {
         final TokenResponse response = authService.register(request);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<TokenResponse> authenticate(@RequestBody AuthRequest request) {
+    public ResponseEntity<TokenResponse> authenticate(@Valid @RequestBody AuthRequest request) {
         final TokenResponse response = authService.authenticate(request);
         return ResponseEntity.ok(response);
     }

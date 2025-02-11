@@ -25,7 +25,7 @@ public class AuthService {
     public TokenResponse register(final RegisterRequest request) {
         final User userExists = userRepository.findByEmail(request.email()).orElse(null);
         if(userExists != null) {
-            throw new IllegalArgumentException("User already exists");
+            throw new IllegalArgumentException("Usuario ya existe");
         }
         final User user = User.builder()
                 .email(request.email())
@@ -48,7 +48,7 @@ public class AuthService {
                 )
         );
         final User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
         final String accessToken = jwtService.generateToken(user);
         final String refreshToken = jwtService.generateRefreshToken(user);
         return new TokenResponse(accessToken, refreshToken);
@@ -61,12 +61,12 @@ public class AuthService {
         final String refreshToken = authentication.substring(7);
         final String username = jwtService.extractSubject(refreshToken);
         if(username == null) {
-            return null;
+            throw new IllegalArgumentException("Invalid token");
         }
-        final User user = this.userRepository.findByEmail(username).orElseThrow();
+        final User user = this.userRepository.findByEmail(username).orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
         final boolean isTokenValid = jwtService.isTokenValid(refreshToken, user);
         if (!isTokenValid) {
-            return null;
+            throw new IllegalArgumentException("Invalid token");
         }
 
         final String accessToken = jwtService.generateRefreshToken(user);

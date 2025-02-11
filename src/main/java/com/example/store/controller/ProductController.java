@@ -5,6 +5,7 @@ import com.example.store.dtos.ProductRequest;
 import com.example.store.dtos.ProductResponse;
 import com.example.store.dtos.ProductUpdateRequest;
 import com.example.store.service.ProductService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,12 +33,12 @@ public class ProductController {
         return ResponseEntity.ok(productService.getProducts());
     }
     @PostMapping("/")
-    public ResponseEntity<ProductResponse> createProduct(@RequestBody ProductRequest product) {
+    public ResponseEntity<ProductResponse> createProduct(@Valid @RequestBody ProductRequest product) {
         ProductResponse productSaved = productService.createProduct(product);
         return ResponseEntity.ok(productSaved);
     }
     @PutMapping("/")
-    public ResponseEntity<ProductResponse> updateProduct(@RequestBody ProductUpdateRequest product) {
+    public ResponseEntity<ProductResponse> updateProduct(@Valid @RequestBody ProductUpdateRequest product) {
         ProductResponse productSaved = productService.updateProduct(product);
         if(productSaved == null) {
             return ResponseEntity.notFound().build();

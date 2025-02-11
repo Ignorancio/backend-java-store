@@ -4,6 +4,7 @@ import com.example.store.dtos.CategoryRequest;
 import com.example.store.dtos.CategoryResponse;
 import com.example.store.dtos.CategoryUpdateRequest;
 import com.example.store.service.ProductService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,12 +30,12 @@ public class CategoryController {
         return ResponseEntity.ok(productService.getCategories());
     }
     @PostMapping("/")
-    public ResponseEntity<CategoryResponse> createCategory(@RequestBody CategoryRequest category) {
+    public ResponseEntity<CategoryResponse> createCategory(@Valid @RequestBody CategoryRequest category) {
         CategoryResponse categorySaved = productService.createCategory(category);
         return ResponseEntity.ok(categorySaved);
     }
     @PutMapping("/")
-    public ResponseEntity<CategoryResponse> updateCategory(@RequestBody CategoryUpdateRequest category) {
+    public ResponseEntity<CategoryResponse> updateCategory(@Valid @RequestBody CategoryUpdateRequest category) {
         CategoryResponse categorySaved = productService.updateCategory(category);
         if(categorySaved == null) {
             return ResponseEntity.notFound().build();

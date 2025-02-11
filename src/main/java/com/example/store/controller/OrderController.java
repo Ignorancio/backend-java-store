@@ -3,6 +3,7 @@ package com.example.store.controller;
 import com.example.store.dtos.OrderRequest;
 import com.example.store.dtos.OrderResponse;
 import com.example.store.service.OrderService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,7 +16,7 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping("/")
-    public OrderResponse createOrder(@RequestBody OrderRequest orderRequest) {
+    public OrderResponse createOrder(@Valid @RequestBody OrderRequest orderRequest) {
         return orderService.createOrder(orderRequest);
     }
     @GetMapping("/{id}")
