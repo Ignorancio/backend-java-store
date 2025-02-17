@@ -1,10 +1,7 @@
 package com.example.store.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -12,12 +9,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-@Data
 @Builder
-@RequiredArgsConstructor
+@NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "usuarios")
+@Getter
+@Setter
+@EqualsAndHashCode(exclude = "orders")
+@ToString(exclude = "orders")
+@Entity(name = "usuarios")
 public class User implements UserDetails {
 
     @Id

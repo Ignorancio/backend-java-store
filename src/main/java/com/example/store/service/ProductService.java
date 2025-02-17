@@ -7,6 +7,7 @@ import com.example.store.repository.CategoryRepository;
 import com.example.store.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -16,9 +17,10 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final ProductImageService productImageService;
 
     public CategoryResponse createCategory(CategoryRequest categoryRequest) {
-        Category categorycheck = categoryRepository.findByName(categoryRequest.name()).orElse(null);
+        Category categorycheck = categoryRepository.findByName(categoryRequest.name()).orElseGet(null);
         if(categorycheck!=null){
             throw new IllegalArgumentException("Categoria ya existe");
         }
@@ -53,12 +55,12 @@ public class ProductService {
         return new CategoryResponse(category.getId(), category.getName());
     }
     private Category assingCategory(ProductRequest productRequest){
-        Category category = categoryRepository.findByName(productRequest.category()).orElse(
-                categoryRepository.save(Category.builder().name(productRequest.category()).build())
-        );
+        Category category = categoryRepository.findByName(productRequest.category()).orElseGet(() -> categoryRepository.save(
+                Category.builder().name(productRequest.category()).build()
+        ));
         return category;
     }
-    public ProductResponse createProduct(ProductRequest productRequest) {
+    public ProductResponse createProduct(ProductRequest productRequest, MultipartFile file) {
         Product product = Product.builder()
                 .name(productRequest.name())
                 .description(productRequest.description())
@@ -68,6 +70,9 @@ public class ProductService {
         Category categoryResponse = assingCategory(productRequest);
         product.setCategory(categoryResponse);
         productRepository.save(product);
+        if(file != null && !file.isEmpty()) {
+            productImageService.saveImage(product.getName(), file);
+        }
         ProductResponse productResponse = new ProductResponse(product.getId(), product.getName(), product.getDescription(), product.getPrice(), product.getStock(), product.getCategory().getName());
         return productResponse;
     }
@@ -85,7 +90,7 @@ public class ProductService {
                 .map(product -> new ProductResponse(product.getId(), product.getName(), product.getDescription(), product.getPrice(), product.getStock(), product.getCategory().getName()))
                 .toList();
     }
-    public ProductResponse updateProduct(ProductUpdateRequest productRequest) {
+    public ProductResponse updateProduct(ProductUpdateRequest productRequest, MultipartFile file) {
         Product product = productRepository.findById(productRequest.id()).orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
         product.setName(productRequest.name());
         product.setDescription(productRequest.description());
@@ -94,13 +99,17 @@ public class ProductService {
         Category categoryResponse = assingCategory(new ProductRequest(productRequest.name(), productRequest.description(), productRequest.price(), productRequest.stock(), productRequest.category()));
         product.setCategory(categoryResponse);
         productRepository.save(product);
+        if(file != null && !file.isEmpty()) {
+            productImageService.updateImage(product.getName(), file);
+        }
         return new ProductResponse(product.getId(), product.getName(), product.getDescription(), product.getPrice(), product.getStock(), product.getCategory().getName());
     }
     public ProductResponse deleteProduct(Long id) {
         Product product = productRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
-        if(product.getOrderDetails()!=null){
+        if(!product.getOrderDetails().isEmpty()){
             throw new IllegalArgumentException("Existen ordenes asociadas a este producto");
         }
+        productImageService.deleteImage(product.getProductImage().getId());
         productRepository.delete(product);
         return new ProductResponse(product.getId(), product.getName(), product.getDescription(), product.getPrice(), product.getStock(), product.getCategory().getName());
     }

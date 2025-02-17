@@ -1,12 +1,17 @@
 package com.example.store.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+@EqualsAndHashCode(exclude = {"user","orderDetails"})
+@ToString(exclude = {"user","orderDetails"})
 @Entity(name = "orders")
 public class Order {
     @Id

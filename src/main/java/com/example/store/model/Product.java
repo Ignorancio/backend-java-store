@@ -1,18 +1,18 @@
 package com.example.store.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
-@Data
 @Builder
-@Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
+@EqualsAndHashCode(exclude = "orderDetails")
+@ToString(exclude = "orderDetails")
+@Entity
 public class Product {
     @Id
     @GeneratedValue
@@ -26,4 +26,6 @@ public class Product {
     private Category category;
     @OneToMany(mappedBy = "product")
     private List<OrderDetails> orderDetails;
+    @OneToOne(mappedBy = "product")
+    private ProductImage productImage;
 }

@@ -23,8 +23,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     public TokenResponse register(final RegisterRequest request) {
-        final User userExists = userRepository.findByEmail(request.email()).orElse(null);
-        if(userExists != null) {
+        if(userRepository.existsByEmail(request.email())) {
             throw new IllegalArgumentException("Usuario ya existe");
         }
         final User user = User.builder()

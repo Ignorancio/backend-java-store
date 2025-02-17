@@ -7,8 +7,10 @@ import com.example.store.dtos.ProductUpdateRequest;
 import com.example.store.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -18,7 +20,6 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
-
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponse> getProductById(@PathVariable Long id) {
@@ -33,13 +34,15 @@ public class ProductController {
         return ResponseEntity.ok(productService.getProducts());
     }
     @PostMapping("/")
-    public ResponseEntity<ProductResponse> createProduct(@Valid @RequestBody ProductRequest product) {
-        ProductResponse productSaved = productService.createProduct(product);
-        return ResponseEntity.ok(productSaved);
+    public ResponseEntity<ProductResponse> createProduct(@Valid @RequestPart("product") ProductRequest product,
+                                                         @RequestPart(value = "file",required = false) MultipartFile file) {
+        ProductResponse productSaved = productService.createProduct(product, file);
+        return ResponseEntity.status(HttpStatus.CREATED).body(productSaved);
     }
     @PutMapping("/")
-    public ResponseEntity<ProductResponse> updateProduct(@Valid @RequestBody ProductUpdateRequest product) {
-        ProductResponse productSaved = productService.updateProduct(product);
+    public ResponseEntity<ProductResponse> updateProduct(@Valid @RequestPart("product") ProductUpdateRequest product,
+                                                         @RequestPart(value = "file",required = false) MultipartFile file) {
+        ProductResponse productSaved = productService.updateProduct(product,file);
         if(productSaved == null) {
             return ResponseEntity.notFound().build();
         }
@@ -53,4 +56,5 @@ public class ProductController {
         }
         return ResponseEntity.ok(product);
     }
+
 }

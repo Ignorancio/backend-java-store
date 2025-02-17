@@ -1,15 +1,15 @@
 package com.example.store.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+@EqualsAndHashCode(exclude = {"order", "product"})
+@ToString(exclude = {"order", "product"})
 @Entity(name = "order_details")
 public class OrderDetails {
     @Id
