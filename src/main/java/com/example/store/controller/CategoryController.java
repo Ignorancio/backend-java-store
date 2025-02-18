@@ -7,6 +7,7 @@ import com.example.store.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,11 +31,13 @@ public class CategoryController {
         return ResponseEntity.ok(productService.getCategories());
     }
     @PostMapping("/")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CategoryResponse> createCategory(@Valid @RequestBody CategoryRequest category) {
         CategoryResponse categorySaved = productService.createCategory(category);
         return ResponseEntity.ok(categorySaved);
     }
     @PutMapping("/")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CategoryResponse> updateCategory(@Valid @RequestBody CategoryUpdateRequest category) {
         CategoryResponse categorySaved = productService.updateCategory(category);
         if(categorySaved == null) {
@@ -43,6 +46,7 @@ public class CategoryController {
         return ResponseEntity.ok(categorySaved);
     }
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CategoryResponse> deleteCategory(@PathVariable Long id) {
         CategoryResponse category = productService.deleteCategory(id);
         if(category == null) {

@@ -17,9 +17,13 @@ public class Product {
     @Id
     @GeneratedValue
     private Long id;
+    @Column(nullable = false,unique = true)
     private String name;
+    @Column(nullable = false)
     private String description;
+    @Column(nullable = false)
     private Double price;
+    @Column(nullable = false)
     private Integer stock;
     @ManyToOne
     @JoinColumn(name = "category_id")

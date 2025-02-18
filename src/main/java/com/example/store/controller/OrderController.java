@@ -5,6 +5,7 @@ import com.example.store.dtos.OrderResponse;
 import com.example.store.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +17,7 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping("/")
+    @PreAuthorize("hasRole('USER')")
     public OrderResponse createOrder(@Valid @RequestBody OrderRequest orderRequest) {
         return orderService.createOrder(orderRequest);
     }
@@ -28,6 +30,7 @@ public class OrderController {
         return orderService.getUserOrders();
     }
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public String deleteOrder(@PathVariable Long id) {
         return orderService.deleteOrder(id);
     }

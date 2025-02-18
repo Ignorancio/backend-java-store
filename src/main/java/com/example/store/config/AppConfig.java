@@ -1,5 +1,6 @@
 package com.example.store.config;
 
+import com.example.store.model.Role;
 import com.example.store.model.User;
 import com.example.store.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,9 @@ public class AppConfig {
             return org.springframework.security.core.userdetails.User.builder()
                     .username(user.getUsername())
                     .password(user.getPassword())
-                    .roles(user.getRole().name())
+                    .roles(user.getRoles().stream()
+                            .map(Role::name)
+                            .toArray(String[]::new))
                     .build();
         };
     }

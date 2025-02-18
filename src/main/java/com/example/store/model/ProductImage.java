@@ -15,6 +15,7 @@ public class ProductImage {
     @Id
     @GeneratedValue
     private Long id;
+    @Column(nullable = false)
     private String url;
     @OneToOne
     @JoinColumn(name = "product_id")

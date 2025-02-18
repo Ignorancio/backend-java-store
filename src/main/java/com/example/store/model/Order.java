@@ -22,8 +22,10 @@ public class Order {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Column(nullable = false)
     private Double total;
 
+    @Column(nullable = false)
     private String status;
 
     @OneToMany(mappedBy = "order")

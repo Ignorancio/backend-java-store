@@ -3,12 +3,16 @@ package com.example.store.config;
 import com.example.store.model.User;
 import com.example.store.repository.UserRepository;
 import com.example.store.service.JwtService;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -36,29 +40,24 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
-        /*if (request.getServletPath().contains("/api/v1/auth")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-        */
-        final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-        final String jwt = authHeader.substring(7);
-        final String id = jwtService.extractSubject(jwt);
-        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (id == null || authentication != null) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-        final Optional<User> user = userRepository.findById(UUID.fromString(id));
+        try{
+            final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+            final String jwt = authHeader.substring(7);
+            final String id = jwtService.extractSubject(jwt);
+            final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (id == null || authentication != null) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+            final Optional<User> user = userRepository.findById(UUID.fromString(id));
 
-        final UserDetails userDetails = this.userDetailsService.loadUserByUsername(user.get().getEmail());
+            final UserDetails userDetails = this.userDetailsService.loadUserByUsername(user.get().getEmail());
 
 
-        if (user.isPresent()) {
             final boolean isTokenValid = jwtService.isTokenValid(jwt, user.get());
 
             if (isTokenValid) {
@@ -72,8 +71,31 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 );
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
+
+            filterChain.doFilter(request, response);
+        }
+        catch (ExpiredJwtException e){
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.getWriter().write(
+                    "{ \"error\": \"Unauthorized\", \"message\": \"Token expirado\" }"
+            );
+        }
+        catch (SignatureException e){
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.getWriter().write(
+                    "{ \"error\": \"Unauthorized\", \"message\": \"Token invalido\" }"
+            );
+        }
+        catch (MalformedJwtException e)
+        {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.getWriter().write(
+                    "{ \"error\": \"Unauthorized\", \"message\": \"Token mal formado\" }"
+            );
         }
 
-        filterChain.doFilter(request, response);
     }
 }

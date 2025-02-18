@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,12 +35,14 @@ public class ProductController {
         return ResponseEntity.ok(productService.getProducts());
     }
     @PostMapping("/")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProductResponse> createProduct(@Valid @RequestPart("product") ProductRequest product,
                                                          @RequestPart(value = "file",required = false) MultipartFile file) {
         ProductResponse productSaved = productService.createProduct(product, file);
         return ResponseEntity.status(HttpStatus.CREATED).body(productSaved);
     }
     @PutMapping("/")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProductResponse> updateProduct(@Valid @RequestPart("product") ProductUpdateRequest product,
                                                          @RequestPart(value = "file",required = false) MultipartFile file) {
         ProductResponse productSaved = productService.updateProduct(product,file);
@@ -49,6 +52,7 @@ public class ProductController {
         return ResponseEntity.ok(productSaved);
     }
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProductResponse> deleteProduct(@PathVariable Long id) {
         ProductResponse product = productService.deleteProduct(id);
         if(product == null) {

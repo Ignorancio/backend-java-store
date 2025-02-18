@@ -17,6 +17,7 @@ public class Category {
     @Id
     @GeneratedValue
     private Long id;
+    @Column(nullable = false,unique = true)
     private String name;
     @OneToMany(mappedBy = "category")
     private List<Product> products;
