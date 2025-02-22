@@ -26,16 +26,19 @@ public class CategoryController {
         }
         return ResponseEntity.ok(category);
     }
+
     @GetMapping("/")
     public ResponseEntity<List<CategoryResponse>> getCategories() {
         return ResponseEntity.ok(productService.getCategories());
     }
+
     @PostMapping("/")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CategoryResponse> createCategory(@Valid @RequestBody CategoryRequest category) {
         CategoryResponse categorySaved = productService.createCategory(category);
         return ResponseEntity.ok(categorySaved);
     }
+
     @PutMapping("/")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CategoryResponse> updateCategory(@Valid @RequestBody CategoryUpdateRequest category) {
@@ -45,6 +48,7 @@ public class CategoryController {
         }
         return ResponseEntity.ok(categorySaved);
     }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CategoryResponse> deleteCategory(@PathVariable Long id) {

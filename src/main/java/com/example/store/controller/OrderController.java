@@ -17,20 +17,27 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping("/")
-    @PreAuthorize("hasRole('USER')")
     public OrderResponse createOrder(@Valid @RequestBody OrderRequest orderRequest) {
         return orderService.createOrder(orderRequest);
     }
+
     @GetMapping("/{id}")
-    public OrderResponse getOrder(@PathVariable Long id) {
+    public OrderResponse findOrderByUser(@PathVariable Long id) {
         return orderService.getOrder(id);
     }
+
     @GetMapping("/")
-    public List<OrderResponse> getOrders() {
+    public List<OrderResponse> findAllOrderByUser() {
         return orderService.getUserOrders();
     }
-    @DeleteMapping("/{id}")
+
+    @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN')")
+    public List<OrderResponse> findAllOrders() {
+        return orderService.getAllOrders();
+    }
+
+    @DeleteMapping("/{id}")
     public String deleteOrder(@PathVariable Long id) {
         return orderService.deleteOrder(id);
     }

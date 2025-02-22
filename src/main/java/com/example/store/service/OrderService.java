@@ -56,7 +56,11 @@ public class OrderService {
         return "Orden eliminada";
     }
     public OrderResponse getOrder(Long id){
+        String Email = AuthUtil.getAuthenticatedUserEmail();
         Order order = orderRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("Orden no encontrada"));
+        if(!order.getUser().getEmail().equals(Email)){
+            throw new IllegalArgumentException("No tienes permiso para ver esta orden");
+        }
         List<OrderDetails> orderDetails = order.getOrderDetails();
         List<OrderDetailsResponse> orderDetailsResponse = new ArrayList<>();
         for(OrderDetails orderDetail : orderDetails){
@@ -82,6 +86,20 @@ public class OrderService {
         List<OrderResponse> orderResponses = new ArrayList<>();
         for(Order order : orders){
             orderResponses.add(getOrder(order.getId()));
+        }
+        return orderResponses;
+    }
+    public List<OrderResponse> getAllOrders(){
+        List<Order> orders = orderRepository.findAll();
+        List<OrderResponse> orderResponses = new ArrayList<>();
+        for(Order order : orders){
+            orderResponses.add(new OrderResponse(
+                    order.getId(),
+                    order.getUser().getEmail(),
+                    order.getTotal(),
+                    order.getStatus(),
+                    new ArrayList<>()
+            ));
         }
         return orderResponses;
     }

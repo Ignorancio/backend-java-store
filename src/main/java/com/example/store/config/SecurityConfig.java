@@ -1,14 +1,12 @@
 package com.example.store.config;
 
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -26,16 +24,19 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception{
         http
-                .csrf(e-> e.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req -> req
-                        .requestMatchers("/auth/**",
-                                "/api/v1/**")
-                                .permitAll()
-                        .requestMatchers( "/v3/api-docs/**",
+                        .requestMatchers(
+                                "/auth/**",
+                                "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
-                                "/actuator/**")
+                                "/actuator/**",
+                                "/api/v1/**")
                                 .permitAll()
+                        .requestMatchers(
+                                "/api/v1/orders/**")
+                                .hasRole("USER")
                         .anyRequest()
                                 .authenticated())
                 .exceptionHandling(e -> e
@@ -46,4 +47,5 @@ public class SecurityConfig {
         ;
         return http.build();
     }
+
 }

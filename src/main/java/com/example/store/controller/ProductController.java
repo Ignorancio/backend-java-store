@@ -30,10 +30,12 @@ public class ProductController {
         }
         return ResponseEntity.ok(product);
     }
+
     @GetMapping("/")
     public ResponseEntity<List<ProductResponse>> getProducts() {
         return ResponseEntity.ok(productService.getProducts());
     }
+
     @PostMapping("/")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProductResponse> createProduct(@Valid @RequestPart("product") ProductRequest product,
