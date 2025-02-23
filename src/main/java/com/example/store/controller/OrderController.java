@@ -5,6 +5,8 @@ import com.example.store.dtos.OrderResponse;
 import com.example.store.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,31 +16,32 @@ import java.util.List;
 @RequestMapping("/api/v1/orders")
 @RequiredArgsConstructor
 public class OrderController {
+
     private final OrderService orderService;
 
     @PostMapping("/")
-    public OrderResponse createOrder(@Valid @RequestBody OrderRequest orderRequest) {
-        return orderService.createOrder(orderRequest);
+    public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody OrderRequest orderRequest) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.createOrder(orderRequest));
     }
 
     @GetMapping("/{id}")
-    public OrderResponse findOrderByUser(@PathVariable Long id) {
-        return orderService.getOrder(id);
+    public ResponseEntity<OrderResponse> findOrderByUser(@PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(orderService.getOrder(id));
     }
 
     @GetMapping("/")
-    public List<OrderResponse> findAllOrderByUser() {
-        return orderService.getUserOrders();
+    public ResponseEntity<List<OrderResponse>> findAllOrderByUser() {
+        return ResponseEntity.status(HttpStatus.OK).body(orderService.getUserOrders());
     }
 
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN')")
-    public List<OrderResponse> findAllOrders() {
-        return orderService.getAllOrders();
+    public ResponseEntity<List<OrderResponse>> findAllOrders() {
+        return ResponseEntity.status(HttpStatus.OK).body(orderService.getAllOrders());
     }
 
     @DeleteMapping("/{id}")
-    public String deleteOrder(@PathVariable Long id) {
-        return orderService.deleteOrder(id);
+    public ResponseEntity<String> deleteOrder(@PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(orderService.deleteOrder(id));
     }
 }

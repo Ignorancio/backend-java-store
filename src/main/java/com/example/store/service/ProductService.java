@@ -20,8 +20,7 @@ public class ProductService {
     private final ProductImageService productImageService;
 
     public CategoryResponse createCategory(CategoryRequest categoryRequest) {
-        Category categorycheck = categoryRepository.findByName(categoryRequest.name()).orElseGet(null);
-        if(categorycheck!=null){
+        if(categoryRepository.existsByName(categoryRequest.name())){
             throw new IllegalArgumentException("Categoria ya existe");
         }
         Category category = Category.builder()
@@ -30,22 +29,26 @@ public class ProductService {
         Category categorySave = categoryRepository.save(category);
         return new CategoryResponse(categorySave.getId(),categorySave.getName());
     }
+
     public CategoryResponse getCategory(Long id) {
         Category category = categoryRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Categoria no encontrada"));
         return new CategoryResponse(category.getId(), category.getName());
     }
+
     public List<CategoryResponse> getCategories() {
         List<Category> categories = categoryRepository.findAll();
         return categories.stream()
                 .map(category -> new CategoryResponse(category.getId(), category.getName()))
                 .toList();
     }
+
     public CategoryResponse updateCategory(CategoryUpdateRequest categoryRequest) {
         Category category = categoryRepository.findById(categoryRequest.id()).orElseThrow(() -> new IllegalArgumentException("Categoria no encontrada"));
         category.setName(categoryRequest.name());
         categoryRepository.save(category);
         return new CategoryResponse(category.getId(), category.getName());
     }
+
     public CategoryResponse deleteCategory(Long id) {
         Category category = categoryRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Categoria no encontrada"));
         if(category.getProducts()!=null){
@@ -54,12 +57,13 @@ public class ProductService {
         categoryRepository.delete(category);
         return new CategoryResponse(category.getId(), category.getName());
     }
+
     private Category assingCategory(ProductRequest productRequest){
-        Category category = categoryRepository.findByName(productRequest.category()).orElseGet(() -> categoryRepository.save(
+        return categoryRepository.findByName(productRequest.category()).orElseGet(() -> categoryRepository.save(
                 Category.builder().name(productRequest.category()).build()
         ));
-        return category;
     }
+
     public ProductResponse createProduct(ProductRequest productRequest, MultipartFile file) {
         Product product = Product.builder()
                 .name(productRequest.name())
@@ -73,23 +77,32 @@ public class ProductService {
         if(file != null && !file.isEmpty()) {
             productImageService.saveImage(product.getName(), file);
         }
-        ProductResponse productResponse = new ProductResponse(product.getId(), product.getName(), product.getDescription(), product.getPrice(), product.getStock(), product.getCategory().getName());
-        return productResponse;
+        return new ProductResponse(
+                product.getId(),
+                product.getName(),
+                product.getDescription(),
+                product.getPrice(),
+                product.getStock(),
+                product.getCategory().getName());
     }
+
     public ProductResponse getProduct(Long id) {
-        Product product = productRepository.findById(id).orElse(null);
-        if(product == null) {
-            return null;
-        }
-        ProductResponse productResponse = new ProductResponse(product.getId(), product.getName(), product.getDescription(), product.getPrice(), product.getStock(), product.getCategory().getName());
-        return productResponse;
+        Product product = productRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
+        return new ProductResponse(
+                product.getId(),
+                product.getName(),
+                product.getDescription(),
+                product.getPrice(), product.getStock(),
+                product.getCategory().getName());
     }
+
     public List<ProductResponse> getProducts() {
         List<Product> products = productRepository.findAll();
         return products.stream()
                 .map(product -> new ProductResponse(product.getId(), product.getName(), product.getDescription(), product.getPrice(), product.getStock(), product.getCategory().getName()))
                 .toList();
     }
+
     public ProductResponse updateProduct(ProductUpdateRequest productRequest, MultipartFile file) {
         Product product = productRepository.findById(productRequest.id()).orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
         product.setName(productRequest.name());
@@ -102,15 +115,30 @@ public class ProductService {
         if(file != null && !file.isEmpty()) {
             productImageService.updateImage(product.getName(), file);
         }
-        return new ProductResponse(product.getId(), product.getName(), product.getDescription(), product.getPrice(), product.getStock(), product.getCategory().getName());
+        return new ProductResponse(
+                product.getId(),
+                product.getName(),
+                product.getDescription(),
+                product.getPrice(),
+                product.getStock(),
+                product.getCategory().getName());
     }
+
     public ProductResponse deleteProduct(Long id) {
         Product product = productRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
         if(!product.getOrderDetails().isEmpty()){
             throw new IllegalArgumentException("Existen ordenes asociadas a este producto");
         }
-        productImageService.deleteImage(product.getProductImage().getId());
+        if(product.getProductImage()!=null){
+            productImageService.deleteImage(product.getProductImage().getId());
+        }
         productRepository.delete(product);
-        return new ProductResponse(product.getId(), product.getName(), product.getDescription(), product.getPrice(), product.getStock(), product.getCategory().getName());
+        return new ProductResponse(
+                product.getId(),
+                product.getName(),
+                product.getDescription(),
+                product.getPrice(),
+                product.getStock(),
+                product.getCategory().getName());
     }
 }

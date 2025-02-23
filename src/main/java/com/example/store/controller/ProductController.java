@@ -57,9 +57,6 @@ public class ProductController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProductResponse> deleteProduct(@PathVariable Long id) {
         ProductResponse product = productService.deleteProduct(id);
-        if(product == null) {
-            return ResponseEntity.notFound().build();
-        }
         return ResponseEntity.ok(product);
     }
 

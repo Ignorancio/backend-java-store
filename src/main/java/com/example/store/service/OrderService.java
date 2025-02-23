@@ -13,16 +13,17 @@ import com.example.store.repository.OrderDetailsRepository;
 import com.example.store.repository.OrderRepository;
 import com.example.store.repository.ProductRepository;
 import com.example.store.repository.UserRepository;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Service
 public class OrderService {
+
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final OrderRepository orderRepository;
@@ -48,6 +49,7 @@ public class OrderService {
                 orderDetailsResponse
         );
     }
+
     @Transactional
     public String deleteOrder(Long id){
         Order order = orderRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("Orden no encontrada"));
@@ -55,10 +57,12 @@ public class OrderService {
         orderRepository.delete(order);
         return "Orden eliminada";
     }
+
     public OrderResponse getOrder(Long id){
         String Email = AuthUtil.getAuthenticatedUserEmail();
+        boolean isAdmin = AuthUtil.hasRole("ADMIN");
         Order order = orderRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("Orden no encontrada"));
-        if(!order.getUser().getEmail().equals(Email)){
+        if(!isAdmin && !order.getUser().getEmail().equals(Email)){
             throw new IllegalArgumentException("No tienes permiso para ver esta orden");
         }
         List<OrderDetails> orderDetails = order.getOrderDetails();
@@ -79,30 +83,57 @@ public class OrderService {
                 orderDetailsResponse
         );
     }
+
     public List<OrderResponse> getUserOrders(){
         String userEmail = AuthUtil.getAuthenticatedUserEmail();
         User user = userRepository.findByEmail(userEmail).orElseThrow(()-> new IllegalArgumentException("Usuario no encontrado"));
         List<Order> orders = orderRepository.findByUser(user);
         List<OrderResponse> orderResponses = new ArrayList<>();
         for(Order order : orders){
-            orderResponses.add(getOrder(order.getId()));
+            List<OrderDetailsResponse> orderDetailsResponse = new ArrayList<>();
+            for(OrderDetails orderDetail : order.getOrderDetails()){
+                orderDetailsResponse.add(new OrderDetailsResponse(
+                        orderDetail.getId(),
+                        orderDetail.getProduct().getName(),
+                        orderDetail.getQuantity(),
+                        orderDetail.getPrice()
+                ));
+            }
+            orderResponses.add(new OrderResponse(
+                    order.getId(),
+                    userEmail,
+                    order.getTotal(),
+                    order.getStatus(),
+                    orderDetailsResponse
+            ));
         }
         return orderResponses;
     }
+
     public List<OrderResponse> getAllOrders(){
         List<Order> orders = orderRepository.findAll();
         List<OrderResponse> orderResponses = new ArrayList<>();
         for(Order order : orders){
+            List<OrderDetailsResponse> orderDetailsResponse = new ArrayList<>();
+            for(OrderDetails orderDetail : order.getOrderDetails()){
+                orderDetailsResponse.add(new OrderDetailsResponse(
+                        orderDetail.getId(),
+                        orderDetail.getProduct().getName(),
+                        orderDetail.getQuantity(),
+                        orderDetail.getPrice()
+                ));
+            }
             orderResponses.add(new OrderResponse(
                     order.getId(),
                     order.getUser().getEmail(),
                     order.getTotal(),
                     order.getStatus(),
-                    new ArrayList<>()
+                    orderDetailsResponse
             ));
         }
         return orderResponses;
     }
+
     private void validateStockAndPrice(Product product, OrderDetailsRequest orderDetailsRequest) {
         if(!(product.getStock() >= orderDetailsRequest.quantity())){
             throw new IllegalStateException("Stock insuficiente");
@@ -111,10 +142,12 @@ public class OrderService {
             throw new IllegalStateException("Precio invalido");
         }
     }
+
     private void updateStock(Product product, OrderDetailsRequest orderDetailsRequest) {
         product.setStock(product.getStock() - orderDetailsRequest.quantity());
         productRepository.save(product);
     }
+
     private OrderDetailsResponse createOrderDetails(OrderDetailsRequest orderDetailsRequest, Order order) {
         Product product = productRepository.findById(orderDetailsRequest.productId()).orElseThrow(
                 ()-> new IllegalArgumentException("Producto no encontrado"));
@@ -135,6 +168,7 @@ public class OrderService {
                 orderDetails.getPrice()
         );
     }
+
     private Double calculateTotalAndCreateDetails(Order order, List<OrderDetailsRequest> orderDetailsRequest,List<OrderDetailsResponse> orderDetailsResponse) {
         double total = 0.0;
         for(OrderDetailsRequest orderDetails : orderDetailsRequest) {

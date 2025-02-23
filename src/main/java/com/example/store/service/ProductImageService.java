@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,6 +24,9 @@ public class ProductImageService {
     public void saveImage(String productName,MultipartFile file) {
         try {
             String fileName = UUID.randomUUID().toString();
+            if(file.getOriginalFilename() == null){
+                throw new IllegalArgumentException("Imagen no encontrada");
+            }
             String extension = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
 
             byte[] bytes = file.getBytes();
