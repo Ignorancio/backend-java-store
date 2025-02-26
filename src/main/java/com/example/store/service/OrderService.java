@@ -52,7 +52,12 @@ public class OrderService {
 
     @Transactional
     public String deleteOrder(Long id){
+        String Email = AuthUtil.getAuthenticatedUserEmail();
+        boolean isAdmin = AuthUtil.hasRole("ADMIN");
         Order order = orderRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("Orden no encontrada"));
+        if(!isAdmin && !order.getUser().getEmail().equals(Email)){
+            throw new IllegalArgumentException("No tienes permiso para eliminar esta orden");
+        }
         orderDetailsRepository.deleteAll(order.getOrderDetails());
         orderRepository.delete(order);
         return "Orden eliminada";
