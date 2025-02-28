@@ -1,5 +1,6 @@
-package com.example.store.config;
+package com.example.store.config.infrastructure;
 
+import com.example.store.config.infrastructure.filter.JwtAuthFilter;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,4 +1,4 @@
-package com.example.store.config;
+package com.example.store.config.infrastructure;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;

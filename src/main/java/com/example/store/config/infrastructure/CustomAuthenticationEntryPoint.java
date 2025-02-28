@@ -1,4 +1,4 @@
-package com.example.store.config;
+package com.example.store.config.infrastructure;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
