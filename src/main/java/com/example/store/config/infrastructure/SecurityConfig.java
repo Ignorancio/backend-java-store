@@ -37,7 +37,8 @@ public class SecurityConfig {
                                 "/api/v1/**")
                                 .permitAll()
                         .requestMatchers(
-                                "/api/v1/orders/**")
+                                "/api/v1/orders/**",
+                                "/api/v1/users/**")
                                 .hasRole("USER")
                         .anyRequest()
                                 .authenticated())
