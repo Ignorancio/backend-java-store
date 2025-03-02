@@ -1,38 +1,18 @@
 package com.example.store.user.infrastructure;
 
 import com.example.store.user.domain.User;
-import com.example.store.user.domain.UserService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
-@RestController
-@RequestMapping("/api/v1/users")
-@RequiredArgsConstructor
-public class UserController {
+public interface UserController {
 
-    private final UserService userService;
+    ResponseEntity<User> updateUser(User user);
 
-    @PutMapping("/")
-    public ResponseEntity<User> updateUser(@RequestBody User user) {
-        return ResponseEntity.ok(userService.update(user));
-    }
+    ResponseEntity<List<User>> getUsers();
 
-    @GetMapping("/")
-    public ResponseEntity<List<User>> getUsers() {
-        return ResponseEntity.ok(userService.findAll());
-    }
+    ResponseEntity<User> getUserById(UUID id);
 
-    @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable String id) {
-        return ResponseEntity.ok(userService.findById(id));
-    }
-
-    @GetMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable String id) {
-        userService.delete(id);
-        return ResponseEntity.ok().build();
-    }
+    ResponseEntity<Void> deleteUser(UUID id);
 }

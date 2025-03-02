@@ -3,9 +3,9 @@ package com.example.store.auth.application;
 import com.example.store.auth.infrastructure.AuthRequest;
 import com.example.store.auth.infrastructure.RegisterRequest;
 import com.example.store.auth.infrastructure.TokenResponse;
-import com.example.store.user.infrastructure.entity.Role;
+import com.example.store.user.domain.Role;
 import com.example.store.user.infrastructure.entity.UserEntity;
-import com.example.store.user.infrastructure.repository.implementation.UserRepository;
+import com.example.store.user.infrastructure.repository.QueryUserRepository;
 import com.example.store.config.application.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
@@ -21,7 +21,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final UserRepository userRepository;
+    private final QueryUserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;

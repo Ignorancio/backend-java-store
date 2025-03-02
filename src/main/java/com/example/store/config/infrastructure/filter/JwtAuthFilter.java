@@ -1,7 +1,7 @@
 package com.example.store.config.infrastructure.filter;
 
 import com.example.store.user.infrastructure.entity.UserEntity;
-import com.example.store.user.infrastructure.repository.implementation.UserRepository;
+import com.example.store.user.infrastructure.repository.QueryUserRepository;
 import com.example.store.config.application.JwtService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -24,7 +24,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Optional;
 import java.util.UUID;
 
 @Component
@@ -33,7 +32,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
-    private final UserRepository userRepository;
+    private final QueryUserRepository userRepository;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,

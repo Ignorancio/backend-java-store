@@ -1,8 +1,8 @@
 package com.example.store.config.infrastructure;
 
-import com.example.store.user.infrastructure.entity.Role;
+import com.example.store.user.domain.Role;
 import com.example.store.user.infrastructure.entity.UserEntity;
-import com.example.store.user.infrastructure.repository.implementation.UserRepository;
+import com.example.store.user.infrastructure.repository.QueryUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,7 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @RequiredArgsConstructor
 public class AppConfig {
 
-    private final UserRepository userRepository;
+    private final QueryUserRepository userRepository;
 
     @Bean
     public UserDetailsService userDetailsService() {

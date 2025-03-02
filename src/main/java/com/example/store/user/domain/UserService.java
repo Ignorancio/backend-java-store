@@ -1,6 +1,7 @@
 package com.example.store.user.domain;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface UserService {
 
@@ -8,7 +9,7 @@ public interface UserService {
 
     List<User> findAll();
 
-    User findById(String id);
+    User findById(UUID id);
 
-    void delete(String id);
+    void delete(UUID id);
 }

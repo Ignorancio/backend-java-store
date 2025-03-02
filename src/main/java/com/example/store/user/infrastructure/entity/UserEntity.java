@@ -1,6 +1,7 @@
 package com.example.store.user.infrastructure.entity;
 
 import com.example.store.order.infrastructure.entity.OrderEntity;
+import com.example.store.user.domain.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
