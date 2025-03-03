@@ -12,7 +12,7 @@ import lombok.*;
 @EqualsAndHashCode(exclude = {"order", "product"})
 @ToString(exclude = {"order", "product"})
 @Entity(name = "order_details")
-public class OrderDetails {
+public class OrderDetailsEntity {
     @Id
     @GeneratedValue
     private Long id;

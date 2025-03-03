@@ -30,5 +30,5 @@ public class OrderEntity {
     private String status;
 
     @OneToMany(mappedBy = "order")
-    private List<OrderDetails> orderDetails= new ArrayList<>();
+    private List<OrderDetailsEntity> orderDetails= new ArrayList<>();
 }

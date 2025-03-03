@@ -1,6 +1,6 @@
 package com.example.store.product.infrastructure.entity;
 
-import com.example.store.order.infrastructure.entity.OrderDetails;
+import com.example.store.order.infrastructure.entity.OrderDetailsEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -28,9 +28,9 @@ public class ProductEntity {
     private Integer stock;
     @ManyToOne
     @JoinColumn(name = "category_id")
-    private Category category;
+    private CategoryEntity category;
     @OneToMany(mappedBy = "product")
-    private List<OrderDetails> orderDetails;
+    private List<OrderDetailsEntity> orderDetails;
     @OneToOne(mappedBy = "product")
-    private ProductImage productImage;
+    private ProductImageEntity productImage;
 }

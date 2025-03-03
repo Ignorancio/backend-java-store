@@ -11,7 +11,7 @@ import lombok.*;
 @EqualsAndHashCode(exclude = "product")
 @ToString(exclude = "product")
 @Entity(name = "product_images")
-public class ProductImage {
+public class ProductImageEntity {
     @Id
     @GeneratedValue
     private Long id;

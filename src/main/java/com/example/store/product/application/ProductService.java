@@ -1,7 +1,7 @@
 package com.example.store.product.application;
 
 import com.example.store.product.infrastructure.*;
-import com.example.store.product.infrastructure.entity.Category;
+import com.example.store.product.infrastructure.entity.CategoryEntity;
 import com.example.store.product.infrastructure.entity.ProductEntity;
 import com.example.store.product.infrastructure.repository.implementation.CategoryRepository;
 import com.example.store.product.infrastructure.repository.implementation.ProductRepository;
@@ -23,34 +23,34 @@ public class ProductService {
         if(categoryRepository.existsByName(categoryRequest.name())){
             throw new IllegalArgumentException("Categoria ya existe");
         }
-        Category category = Category.builder()
+        CategoryEntity category = CategoryEntity.builder()
                 .name(categoryRequest.name())
                 .build();
-        Category categorySave = categoryRepository.save(category);
+        CategoryEntity categorySave = categoryRepository.save(category);
         return new CategoryResponse(categorySave.getId(),categorySave.getName());
     }
 
     public CategoryResponse getCategory(Long id) {
-        Category category = categoryRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Categoria no encontrada"));
+        CategoryEntity category = categoryRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Categoria no encontrada"));
         return new CategoryResponse(category.getId(), category.getName());
     }
 
     public List<CategoryResponse> getCategories() {
-        List<Category> categories = categoryRepository.findAll();
+        List<CategoryEntity> categories = categoryRepository.findAll();
         return categories.stream()
                 .map(category -> new CategoryResponse(category.getId(), category.getName()))
                 .toList();
     }
 
     public CategoryResponse updateCategory(CategoryUpdateRequest categoryRequest) {
-        Category category = categoryRepository.findById(categoryRequest.id()).orElseThrow(() -> new IllegalArgumentException("Categoria no encontrada"));
+        CategoryEntity category = categoryRepository.findById(categoryRequest.id()).orElseThrow(() -> new IllegalArgumentException("Categoria no encontrada"));
         category.setName(categoryRequest.name());
         categoryRepository.save(category);
         return new CategoryResponse(category.getId(), category.getName());
     }
 
     public CategoryResponse deleteCategory(Long id) {
-        Category category = categoryRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Categoria no encontrada"));
+        CategoryEntity category = categoryRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Categoria no encontrada"));
         if(category.getProducts()!=null){
             throw new IllegalArgumentException("Existen productos asociados a esta categoria");
         }
@@ -58,9 +58,9 @@ public class ProductService {
         return new CategoryResponse(category.getId(), category.getName());
     }
 
-    private Category assingCategory(ProductRequest productRequest){
+    private CategoryEntity assingCategory(ProductRequest productRequest){
         return categoryRepository.findByName(productRequest.category()).orElseGet(() -> categoryRepository.save(
-                Category.builder().name(productRequest.category()).build()
+                CategoryEntity.builder().name(productRequest.category()).build()
         ));
     }
 
@@ -71,7 +71,7 @@ public class ProductService {
                 .price(productRequest.price())
                 .stock(productRequest.stock())
                 .build();
-        Category categoryResponse = assingCategory(productRequest);
+        CategoryEntity categoryResponse = assingCategory(productRequest);
         product.setCategory(categoryResponse);
         productRepository.save(product);
         if(file != null && !file.isEmpty()) {
@@ -109,7 +109,7 @@ public class ProductService {
         product.setDescription(productRequest.description());
         product.setPrice(productRequest.price());
         product.setStock(productRequest.stock());
-        Category categoryResponse = assingCategory(new ProductRequest(productRequest.name(), productRequest.description(), productRequest.price(), productRequest.stock(), productRequest.category()));
+        CategoryEntity categoryResponse = assingCategory(new ProductRequest(productRequest.name(), productRequest.description(), productRequest.price(), productRequest.stock(), productRequest.category()));
         product.setCategory(categoryResponse);
         productRepository.save(product);
         if(file != null && !file.isEmpty()) {

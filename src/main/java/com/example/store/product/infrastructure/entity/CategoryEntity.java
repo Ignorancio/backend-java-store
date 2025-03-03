@@ -12,8 +12,8 @@ import java.util.List;
 @Setter
 @EqualsAndHashCode(exclude = "products")
 @ToString(exclude = "products")
-@Entity
-public class Category {
+@Entity(name = "category")
+public class CategoryEntity {
     @Id
     @GeneratedValue
     private Long id;

@@ -1,7 +1,7 @@
 package com.example.store.product.application;
 
 import com.example.store.product.infrastructure.entity.ProductEntity;
-import com.example.store.product.infrastructure.entity.ProductImage;
+import com.example.store.product.infrastructure.entity.ProductImageEntity;
 import com.example.store.product.infrastructure.repository.implementation.ProductImageRepository;
 import com.example.store.product.infrastructure.repository.implementation.ProductRepository;
 import lombok.AllArgsConstructor;
@@ -50,7 +50,7 @@ public class ProductImageService {
             Path path = Paths.get("src/main/resources/images/" + fileName + extension);
             Files.write(path, bytes);
             ProductEntity product = productRepository.findByName(productName).orElseThrow(()-> new IllegalArgumentException("Producto no encontrado"));
-            ProductImage productImage = ProductImage.builder()
+            ProductImageEntity productImage = ProductImageEntity.builder()
                     .url("api/v1/products/images/" + fileName + extension)
                     .product(product)
                     .build();
@@ -61,7 +61,7 @@ public class ProductImageService {
     }
 
     public void deleteImage(Long id) {
-        ProductImage productImage = productImageRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("Imagen no encontrada"));
+        ProductImageEntity productImage = productImageRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("Imagen no encontrada"));
         File file = new File("src/main/resources/images/" + productImage.getUrl().substring(productImage.getUrl().lastIndexOf("/")));
         if(file.exists()){
             file.delete();

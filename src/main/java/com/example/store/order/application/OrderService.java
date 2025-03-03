@@ -6,7 +6,7 @@ import com.example.store.order.infrastructure.OrderDetailsResponse;
 import com.example.store.order.infrastructure.OrderRequest;
 import com.example.store.order.infrastructure.OrderResponse;
 import com.example.store.order.infrastructure.entity.OrderEntity;
-import com.example.store.order.infrastructure.entity.OrderDetails;
+import com.example.store.order.infrastructure.entity.OrderDetailsEntity;
 import com.example.store.product.infrastructure.entity.ProductEntity;
 import com.example.store.user.infrastructure.entity.UserEntity;
 import com.example.store.order.infrastructure.repository.implementation.OrderDetailsRepository;
@@ -70,9 +70,9 @@ public class OrderService {
         if(!isAdmin && !order.getUser().getEmail().equals(Email)){
             throw new IllegalArgumentException("No tienes permiso para ver esta orden");
         }
-        List<OrderDetails> orderDetails = order.getOrderDetails();
+        List<OrderDetailsEntity> orderDetails = order.getOrderDetails();
         List<OrderDetailsResponse> orderDetailsResponse = new ArrayList<>();
-        for(OrderDetails orderDetail : orderDetails){
+        for(OrderDetailsEntity orderDetail : orderDetails){
             orderDetailsResponse.add(new OrderDetailsResponse(
                     orderDetail.getId(),
                     orderDetail.getProduct().getName(),
@@ -96,7 +96,7 @@ public class OrderService {
         List<OrderResponse> orderResponses = new ArrayList<>();
         for(OrderEntity order : orders){
             List<OrderDetailsResponse> orderDetailsResponse = new ArrayList<>();
-            for(OrderDetails orderDetail : order.getOrderDetails()){
+            for(OrderDetailsEntity orderDetail : order.getOrderDetails()){
                 orderDetailsResponse.add(new OrderDetailsResponse(
                         orderDetail.getId(),
                         orderDetail.getProduct().getName(),
@@ -120,7 +120,7 @@ public class OrderService {
         List<OrderResponse> orderResponses = new ArrayList<>();
         for(OrderEntity order : orders){
             List<OrderDetailsResponse> orderDetailsResponse = new ArrayList<>();
-            for(OrderDetails orderDetail : order.getOrderDetails()){
+            for(OrderDetailsEntity orderDetail : order.getOrderDetails()){
                 orderDetailsResponse.add(new OrderDetailsResponse(
                         orderDetail.getId(),
                         orderDetail.getProduct().getName(),
@@ -156,14 +156,14 @@ public class OrderService {
     private OrderDetailsResponse createOrderDetails(OrderDetailsRequest orderDetailsRequest, OrderEntity order) {
         ProductEntity product = productRepository.findById(orderDetailsRequest.productId()).orElseThrow(
                 ()-> new IllegalArgumentException("Producto no encontrado"));
-        OrderDetails orderDetails = OrderDetails.builder()
+        OrderDetailsEntity orderDetails = OrderDetailsEntity.builder()
                 .order(order)
                 .product(product)
                 .quantity(orderDetailsRequest.quantity())
                 .price(orderDetailsRequest.price())
                 .build();
         orderDetailsRepository.save(orderDetails);
-        List<OrderDetails> orderDetailsList = order.getOrderDetails();
+        List<OrderDetailsEntity> orderDetailsList = order.getOrderDetails();
         orderDetailsList.add(orderDetails);
         order.setOrderDetails(orderDetailsList);
         return new OrderDetailsResponse(
