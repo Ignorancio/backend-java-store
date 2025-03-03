@@ -13,7 +13,7 @@ import java.util.List;
 @Setter
 @EqualsAndHashCode(exclude = "orderDetails")
 @ToString(exclude = "orderDetails")
-@Entity
+@Entity(name = "product")
 public class ProductEntity {
     @Id
     @GeneratedValue

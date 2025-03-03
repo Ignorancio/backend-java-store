@@ -4,8 +4,9 @@ import com.example.store.user.domain.User;
 import com.example.store.user.infrastructure.dto.UserDTO;
 import com.example.store.user.infrastructure.entity.UserEntity;
 import org.mapstruct.Mapper;
+import org.mapstruct.MappingConstants;
 
-@Mapper
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface UserMapper {
 
     User userEntityToUser(UserEntity userEntity);

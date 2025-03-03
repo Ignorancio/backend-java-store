@@ -4,6 +4,7 @@ import com.example.store.user.domain.User;
 import com.example.store.user.domain.UserRepository;
 import com.example.store.user.domain.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +19,8 @@ public class UserServiceImpl implements UserService {
     public User update(User updateUser) {
 
         User user = userRepository.findById(updateUser.getId()).orElseThrow(()-> new IllegalArgumentException("Usuario no encontrado"));
+
+        BeanUtils.copyProperties(updateUser, user, "role");
 
         return userRepository.save(user);
     }
