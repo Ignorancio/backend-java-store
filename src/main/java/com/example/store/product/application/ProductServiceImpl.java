@@ -1,10 +1,12 @@
 package com.example.store.product.application;
 
+import com.example.store.category.infrastructure.dto.CategoryRequest;
+import com.example.store.category.infrastructure.dto.CategoryResponse;
+import com.example.store.category.infrastructure.repository.QueryCategoryRepository;
 import com.example.store.product.infrastructure.dto.*;
-import com.example.store.product.infrastructure.entity.CategoryEntity;
+import com.example.store.category.infrastructure.entity.CategoryEntity;
 import com.example.store.product.infrastructure.entity.ProductEntity;
-import com.example.store.product.infrastructure.repository.implementation.CategoryRepository;
-import com.example.store.product.infrastructure.repository.implementation.ProductRepository;
+import com.example.store.product.infrastructure.repository.QueryProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,8 +17,8 @@ import java.util.List;
 @Service
 public class ProductServiceImpl {
 
-    private final ProductRepository productRepository;
-    private final CategoryRepository categoryRepository;
+    private final QueryProductRepository productRepository;
+    private final QueryCategoryRepository categoryRepository;
     private final ProductImageServiceImpl productImageService;
 
     public CategoryResponse createCategory(CategoryRequest categoryRequest) {

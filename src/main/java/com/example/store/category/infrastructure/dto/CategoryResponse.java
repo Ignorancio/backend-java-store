@@ -1,4 +1,4 @@
-package com.example.store.product.infrastructure.dto;
+package com.example.store.category.infrastructure.dto;
 
 public record CategoryResponse(
         Long id,

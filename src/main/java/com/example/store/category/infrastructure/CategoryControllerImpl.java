@@ -1,8 +1,8 @@
-package com.example.store.product.infrastructure;
+package com.example.store.category.infrastructure;
 
 import com.example.store.product.application.ProductServiceImpl;
-import com.example.store.product.infrastructure.dto.CategoryRequest;
-import com.example.store.product.infrastructure.dto.CategoryResponse;
+import com.example.store.category.infrastructure.dto.CategoryRequest;
+import com.example.store.category.infrastructure.dto.CategoryResponse;
 import com.example.store.product.infrastructure.dto.CategoryUpdateRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

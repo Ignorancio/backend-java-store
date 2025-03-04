@@ -2,8 +2,8 @@ package com.example.store.product.application;
 
 import com.example.store.product.infrastructure.entity.ProductEntity;
 import com.example.store.product.infrastructure.entity.ProductImageEntity;
-import com.example.store.product.infrastructure.repository.implementation.ProductImageRepository;
-import com.example.store.product.infrastructure.repository.implementation.ProductRepository;
+import com.example.store.product.infrastructure.repository.QueryProductImageRepository;
+import com.example.store.product.infrastructure.repository.QueryProductRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,8 +18,8 @@ import java.util.UUID;
 @Service
 public class ProductImageServiceImpl {
 
-    private final ProductImageRepository productImageRepository;
-    private final ProductRepository productRepository;
+    private final QueryProductImageRepository productImageRepository;
+    private final QueryProductRepository productRepository;
 
     public void saveImage(String productName,MultipartFile file) {
         try {

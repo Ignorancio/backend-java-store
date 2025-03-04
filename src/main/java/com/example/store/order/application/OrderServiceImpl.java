@@ -11,7 +11,7 @@ import com.example.store.product.infrastructure.entity.ProductEntity;
 import com.example.store.user.infrastructure.entity.UserEntity;
 import com.example.store.order.infrastructure.repository.implementation.OrderDetailsRepository;
 import com.example.store.order.infrastructure.repository.implementation.OrderRepository;
-import com.example.store.product.infrastructure.repository.implementation.ProductRepository;
+import com.example.store.product.infrastructure.repository.QueryProductRepository;
 import com.example.store.user.infrastructure.repository.QueryUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,7 @@ import java.util.List;
 public class OrderServiceImpl {
 
     private final QueryUserRepository userRepository;
-    private final ProductRepository productRepository;
+    private final QueryProductRepository productRepository;
     private final OrderRepository orderRepository;
     private final OrderDetailsRepository orderDetailsRepository;
 

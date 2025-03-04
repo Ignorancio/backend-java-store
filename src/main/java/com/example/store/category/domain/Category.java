@@ -1,4 +1,4 @@
-package com.example.store.product.domain;
+package com.example.store.category.domain;
 
 public class Category {
     private Long id;

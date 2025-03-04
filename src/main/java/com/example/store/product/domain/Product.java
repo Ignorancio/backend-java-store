@@ -1,5 +1,6 @@
 package com.example.store.product.domain;
 
+import com.example.store.category.domain.Category;
 import lombok.Builder;
 import lombok.Data;
 

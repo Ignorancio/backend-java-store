@@ -1,5 +1,6 @@
 package com.example.store.product.infrastructure.entity;
 
+import com.example.store.category.infrastructure.entity.CategoryEntity;
 import com.example.store.order.infrastructure.entity.OrderDetailsEntity;
 import jakarta.persistence.*;
 import lombok.*;

@@ -14,7 +14,7 @@ import java.util.UUID;
 
 @Repository
 @RequiredArgsConstructor
-public class PostgresUserRepositoryImpl implements UserRepository {
+public class PostgresUserRepository implements UserRepository {
 
     private final QueryUserRepository queryUserRepository;
     private final UserMapper userMapper;
