@@ -1,10 +1,10 @@
 package com.example.store.order.application;
 
 import com.example.store.util.AuthUtil;
-import com.example.store.order.infrastructure.OrderDetailsRequest;
-import com.example.store.order.infrastructure.OrderDetailsResponse;
-import com.example.store.order.infrastructure.OrderRequest;
-import com.example.store.order.infrastructure.OrderResponse;
+import com.example.store.order.infrastructure.dto.OrderDetailsRequest;
+import com.example.store.order.infrastructure.dto.OrderDetailsResponse;
+import com.example.store.order.infrastructure.dto.OrderRequest;
+import com.example.store.order.infrastructure.dto.OrderResponse;
 import com.example.store.order.infrastructure.entity.OrderEntity;
 import com.example.store.order.infrastructure.entity.OrderDetailsEntity;
 import com.example.store.product.infrastructure.entity.ProductEntity;
@@ -22,7 +22,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Service
-public class OrderService {
+public class OrderServiceImpl {
 
     private final QueryUserRepository userRepository;
     private final ProductRepository productRepository;

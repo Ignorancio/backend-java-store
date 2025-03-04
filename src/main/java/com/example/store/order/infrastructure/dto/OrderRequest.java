@@ -1,4 +1,4 @@
-package com.example.store.order.infrastructure;
+package com.example.store.order.infrastructure.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;

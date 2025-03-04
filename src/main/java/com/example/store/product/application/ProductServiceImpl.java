@@ -1,6 +1,6 @@
 package com.example.store.product.application;
 
-import com.example.store.product.infrastructure.*;
+import com.example.store.product.infrastructure.dto.*;
 import com.example.store.product.infrastructure.entity.CategoryEntity;
 import com.example.store.product.infrastructure.entity.ProductEntity;
 import com.example.store.product.infrastructure.repository.implementation.CategoryRepository;
@@ -13,11 +13,11 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Service
-public class ProductService {
+public class ProductServiceImpl {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
-    private final ProductImageService productImageService;
+    private final ProductImageServiceImpl productImageService;
 
     public CategoryResponse createCategory(CategoryRequest categoryRequest) {
         if(categoryRepository.existsByName(categoryRequest.name())){

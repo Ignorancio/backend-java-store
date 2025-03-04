@@ -16,7 +16,7 @@ import java.util.UUID;
 
 @AllArgsConstructor
 @Service
-public class ProductImageService {
+public class ProductImageServiceImpl {
 
     private final ProductImageRepository productImageRepository;
     private final ProductRepository productRepository;

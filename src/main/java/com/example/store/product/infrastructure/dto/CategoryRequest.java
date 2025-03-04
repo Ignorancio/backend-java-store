@@ -1,4 +1,4 @@
-package com.example.store.product.infrastructure;
+package com.example.store.product.infrastructure.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
