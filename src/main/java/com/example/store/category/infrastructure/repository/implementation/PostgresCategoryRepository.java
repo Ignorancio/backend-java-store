@@ -2,15 +2,18 @@ package com.example.store.category.infrastructure.repository.implementation;
 
 import com.example.store.category.domain.Category;
 import com.example.store.category.domain.CategoryRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
+@Repository
 public class PostgresCategoryRepository implements CategoryRepository {
     public Category save(Category category) {
         return null;
     }
 
-    public Category findById(Long id) {
+    public Optional<Category> findById(Long id) {
         return null;
     }
 
@@ -22,7 +25,7 @@ public class PostgresCategoryRepository implements CategoryRepository {
         return null;
     }
 
-    public void delete(Category category) {
+    public void deleteById(Long id) {
 
     }
 }

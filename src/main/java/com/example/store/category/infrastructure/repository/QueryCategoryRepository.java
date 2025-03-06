@@ -9,4 +9,7 @@ public interface QueryCategoryRepository extends JpaRepository<CategoryEntity, L
     Optional<CategoryEntity> findByName(String category);
 
     boolean existsByName(String name);
+
+    @Override
+    void deleteById(Long id);
 }
