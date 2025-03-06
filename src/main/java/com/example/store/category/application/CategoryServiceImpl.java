@@ -33,7 +33,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     public Category update(Category category) {
         Category categorySearch = categoryRepository.findById(category.getId()).orElseThrow(() -> new IllegalArgumentException("Categoria no encontrada"));
-        return categoryRepository.save(categorySearch);
+        return categoryRepository.save(category);
     }
 
     public void deleteById(Long id) {

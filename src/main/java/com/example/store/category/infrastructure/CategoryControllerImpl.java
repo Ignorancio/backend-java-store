@@ -39,7 +39,7 @@ public class CategoryControllerImpl implements CategoryController {
 
     @PutMapping("/")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Category> update(@Valid Category category) {
+    public ResponseEntity<Category> update(@Valid @RequestBody Category category) {
         Category savedCategory = categoryService.update(category);
         return ResponseEntity.status(HttpStatus.OK).body(savedCategory);
     }
