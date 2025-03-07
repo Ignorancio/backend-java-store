@@ -39,4 +39,8 @@ public class PostgresCategoryRepository implements CategoryRepository {
     public void deleteById(Long id) {
         queryCategoryRepository.deleteById(id);
     }
+
+    public Optional<Category> findByName(String name){
+        return queryCategoryRepository.findByName(name).map(categoryMapper::categoryEntityToCategory);
+    }
 }
