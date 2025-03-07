@@ -18,24 +18,25 @@ public class UserControllerImpl implements UserController {
     private final UserService userService;
 
     @PutMapping("/")
-    public ResponseEntity<User> updateUser(@RequestBody User user) {
+    public ResponseEntity<User> update(@RequestBody User user) {
         return ResponseEntity.ok(userService.update(user));
     }
 
     @GetMapping("/")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<User>> getUsers() {
+    public ResponseEntity<List<User>> findAll() {
         return ResponseEntity.ok(userService.findAll());
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<User> getUserById(@PathVariable UUID id) {
+    public ResponseEntity<User> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(userService.findById(id));
     }
 
-    @GetMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
         userService.delete(id);
         return ResponseEntity.ok().build();
     }

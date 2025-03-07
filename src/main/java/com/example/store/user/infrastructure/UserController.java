@@ -8,11 +8,11 @@ import java.util.UUID;
 
 public interface UserController {
 
-    ResponseEntity<User> updateUser(User user);
+    ResponseEntity<User> update(User user);
 
-    ResponseEntity<List<User>> getUsers();
+    ResponseEntity<List<User>> findAll();
 
-    ResponseEntity<User> getUserById(UUID id);
+    ResponseEntity<User> findById(UUID id);
 
-    ResponseEntity<Void> deleteUser(UUID id);
+    ResponseEntity<Void> delete(UUID id);
 }
