@@ -47,7 +47,7 @@ public class PostgresUserRepository implements UserRepository {
     }
 
     @Override
-    public void delete(UUID id) {
+    public void deleteById(UUID id) {
         queryUserRepository.deleteById(id);
     }
 }
