@@ -1,11 +1,8 @@
 package com.example.store.product.infrastructure;
 
-
-import com.example.store.product.application.ProductServiceImpl;
-import com.example.store.product.infrastructure.dto.ProductRequest;
-import com.example.store.product.infrastructure.dto.ProductResponse;
-import com.example.store.product.infrastructure.dto.ProductUpdateRequest;
-import jakarta.validation.Valid;
+import com.example.store.product.domain.Product;
+import com.example.store.product.domain.ProductService;
+import com.example.store.product.infrastructure.dto.ProductDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,50 +11,45 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/products")
 @RequiredArgsConstructor
-public class ProductControllerImpl {
+public class ProductControllerImpl implements ProductController{
 
-    private final ProductServiceImpl productService;
-
-    @GetMapping("/{id}")
-    public ResponseEntity<ProductResponse> getProductById(@PathVariable Long id) {
-        ProductResponse product = productService.getProduct(id);
-        if(product == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(product);
-    }
-
-    @GetMapping("/")
-    public ResponseEntity<List<ProductResponse>> getProducts() {
-        return ResponseEntity.ok(productService.getProducts());
-    }
+    private final ProductService productService;
 
     @PostMapping("/")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ProductResponse> createProduct(@Valid @RequestPart("product") ProductRequest product,
-                                                         @RequestPart(value = "file",required = false) MultipartFile file) {
-        ProductResponse productSaved = productService.createProduct(product, file);
+    public ResponseEntity<Product> save(@RequestPart("product") ProductDTO product,@RequestPart("file") MultipartFile file) {
+        Product productSaved = productService.save(product, file);
         return ResponseEntity.status(HttpStatus.CREATED).body(productSaved);
     }
-    @PutMapping("/")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ProductResponse> updateProduct(@Valid @RequestPart("product") ProductUpdateRequest product,
-                                                         @RequestPart(value = "file",required = false) MultipartFile file) {
-        ProductResponse productSaved = productService.updateProduct(product,file);
-        if(productSaved == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(productSaved);
-    }
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ProductResponse> deleteProduct(@PathVariable Long id) {
-        ProductResponse product = productService.deleteProduct(id);
-        return ResponseEntity.ok(product);
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Product> findById(@PathVariable Long id) {
+        Product productSaved = productService.findById(id);
+        return ResponseEntity.status(HttpStatus.OK).body(productSaved);
     }
 
+    @GetMapping("/")
+    public ResponseEntity<List<Product>> findAll() {
+        List<Product> products = productService.findAll();
+        return ResponseEntity.status(HttpStatus.OK).body(products);
+    }
+
+    @PutMapping("/")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Product> update(@RequestPart("product") Product product,@RequestPart(value = "file", required = false) Optional<MultipartFile> file) {
+        Product productSaved = productService.update(product, file);
+        return ResponseEntity.status(HttpStatus.OK).body(productSaved);
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        productService.deleteById(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 }

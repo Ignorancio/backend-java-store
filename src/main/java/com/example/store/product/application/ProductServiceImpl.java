@@ -1,146 +1,67 @@
 package com.example.store.product.application;
 
-import com.example.store.category.infrastructure.dto.CategoryRequest;
-import com.example.store.category.infrastructure.dto.CategoryResponse;
-import com.example.store.category.infrastructure.repository.QueryCategoryRepository;
+import com.example.store.category.domain.CategoryRepository;
+import com.example.store.product.domain.*;
 import com.example.store.product.infrastructure.dto.*;
-import com.example.store.category.infrastructure.entity.CategoryEntity;
-import com.example.store.product.infrastructure.entity.ProductEntity;
-import com.example.store.product.infrastructure.repository.QueryProductRepository;
+import com.example.store.product.infrastructure.mapper.ProductMapper;
+import com.example.store.util.FileUploadUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 
-@RequiredArgsConstructor
 @Service
-public class ProductServiceImpl {
+@RequiredArgsConstructor
+public class ProductServiceImpl implements ProductService{
 
-    private final QueryProductRepository productRepository;
-    private final QueryCategoryRepository categoryRepository;
-    private final ProductImageServiceImpl productImageService;
+    private final ProductRepository productRepository;
+    private final ProductImageRepository productImageRepository;
+    private final CategoryRepository categoryRepository;
+    private final ProductMapper productMapper;
 
-    public CategoryResponse createCategory(CategoryRequest categoryRequest) {
-        if(categoryRepository.existsByName(categoryRequest.name())){
-            throw new IllegalArgumentException("Categoria ya existe");
+    public Product save(ProductDTO productDTO, MultipartFile file) {
+        Product product = productMapper.productDTOToProduct(productDTO);
+        if(!categoryRepository.existsByName(product.getCategory().getName())){
+            product.setCategory(categoryRepository.save(product.getCategory()));
         }
-        CategoryEntity category = CategoryEntity.builder()
-                .name(categoryRequest.name())
-                .build();
-        CategoryEntity categorySave = categoryRepository.save(category);
-        return new CategoryResponse(categorySave.getId(),categorySave.getName());
-    }
-
-    public CategoryResponse getCategory(Long id) {
-        CategoryEntity category = categoryRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Categoria no encontrada"));
-        return new CategoryResponse(category.getId(), category.getName());
-    }
-
-    public List<CategoryResponse> getCategories() {
-        List<CategoryEntity> categories = categoryRepository.findAll();
-        return categories.stream()
-                .map(category -> new CategoryResponse(category.getId(), category.getName()))
-                .toList();
-    }
-
-    public CategoryResponse updateCategory(CategoryUpdateRequest categoryRequest) {
-        CategoryEntity category = categoryRepository.findById(categoryRequest.id()).orElseThrow(() -> new IllegalArgumentException("Categoria no encontrada"));
-        category.setName(categoryRequest.name());
-        categoryRepository.save(category);
-        return new CategoryResponse(category.getId(), category.getName());
-    }
-
-    public CategoryResponse deleteCategory(Long id) {
-        CategoryEntity category = categoryRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Categoria no encontrada"));
-        if(category.getProducts()!=null){
-            throw new IllegalArgumentException("Existen productos asociados a esta categoria");
+        else {
+            product.setCategory(categoryRepository.findByName(product.getCategory().getName()).get());
         }
-        categoryRepository.delete(category);
-        return new CategoryResponse(category.getId(), category.getName());
+        String fileName = FileUploadUtil.uploadFile("/images", file);
+        ProductImage productImage = ProductImage.builder().url("api/v1/products/images/"+fileName).build();
+        product.setProductImage(productImageRepository.save(productImage));
+        return productRepository.save(product);
     }
 
-    private CategoryEntity assingCategory(ProductRequest productRequest){
-        return categoryRepository.findByName(productRequest.category()).orElseGet(() -> categoryRepository.save(
-                CategoryEntity.builder().name(productRequest.category()).build()
-        ));
+    public List<Product> findAll() {
+        return productRepository.findAll();
     }
 
-    public ProductResponse createProduct(ProductRequest productRequest, MultipartFile file) {
-        ProductEntity product = ProductEntity.builder()
-                .name(productRequest.name())
-                .description(productRequest.description())
-                .price(productRequest.price())
-                .stock(productRequest.stock())
-                .build();
-        CategoryEntity categoryResponse = assingCategory(productRequest);
-        product.setCategory(categoryResponse);
-        productRepository.save(product);
-        if(file != null && !file.isEmpty()) {
-            productImageService.saveImage(product.getName(), file);
+    public Product findById(Long id) {
+        return productRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
+    }
+
+    public Product update(Product product, Optional<MultipartFile> file) {
+        Product productdb = productRepository.findById(product.getId()).orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
+        BeanUtils.copyProperties(product, productdb, "productImage");
+        if(!categoryRepository.existsByName(product.getCategory().getName())){
+            product.setCategory(categoryRepository.save(product.getCategory()));
         }
-        return new ProductResponse(
-                product.getId(),
-                product.getName(),
-                product.getDescription(),
-                product.getPrice(),
-                product.getStock(),
-                product.getCategory().getName());
-    }
-
-    public ProductResponse getProduct(Long id) {
-        ProductEntity product = productRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
-        return new ProductResponse(
-                product.getId(),
-                product.getName(),
-                product.getDescription(),
-                product.getPrice(), product.getStock(),
-                product.getCategory().getName());
-    }
-
-    public List<ProductResponse> getProducts() {
-        List<ProductEntity> products = productRepository.findAll();
-        return products.stream()
-                .map(product -> new ProductResponse(product.getId(), product.getName(), product.getDescription(), product.getPrice(), product.getStock(), product.getCategory().getName()))
-                .toList();
-    }
-
-    public ProductResponse updateProduct(ProductUpdateRequest productRequest, MultipartFile file) {
-        ProductEntity product = productRepository.findById(productRequest.id()).orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
-        product.setName(productRequest.name());
-        product.setDescription(productRequest.description());
-        product.setPrice(productRequest.price());
-        product.setStock(productRequest.stock());
-        CategoryEntity categoryResponse = assingCategory(new ProductRequest(productRequest.name(), productRequest.description(), productRequest.price(), productRequest.stock(), productRequest.category()));
-        product.setCategory(categoryResponse);
-        productRepository.save(product);
-        if(file != null && !file.isEmpty()) {
-            productImageService.updateImage(product.getName(), file);
+        else {
+            product.setCategory(categoryRepository.findByName(product.getCategory().getName()).get());
         }
-        return new ProductResponse(
-                product.getId(),
-                product.getName(),
-                product.getDescription(),
-                product.getPrice(),
-                product.getStock(),
-                product.getCategory().getName());
+        if(file.isPresent() && file.get().getOriginalFilename() != null) {
+            String fileName = FileUploadUtil.uploadFile("/images", file.get());
+            ProductImage productImage = ProductImage.builder().url("api/v1/products/images/"+fileName).build();
+            productdb.setProductImage(productImage);
+        }
+        return productRepository.save(productdb);
     }
 
-    public ProductResponse deleteProduct(Long id) {
-        ProductEntity product = productRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
-        if(!product.getOrderDetails().isEmpty()){
-            throw new IllegalArgumentException("Existen ordenes asociadas a este producto");
-        }
-        if(product.getProductImage()!=null){
-            productImageService.deleteImage(product.getProductImage().getId());
-        }
-        productRepository.delete(product);
-        return new ProductResponse(
-                product.getId(),
-                product.getName(),
-                product.getDescription(),
-                product.getPrice(),
-                product.getStock(),
-                product.getCategory().getName());
+    public void deleteById(Long id) {
+        productRepository.deleteById(id);
     }
 }
