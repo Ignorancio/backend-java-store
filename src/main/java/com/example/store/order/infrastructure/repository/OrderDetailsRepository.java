@@ -1,4 +1,4 @@
-package com.example.store.order.infrastructure.repository.implementation;
+package com.example.store.order.infrastructure.repository;
 
 import com.example.store.order.infrastructure.entity.OrderDetailsEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

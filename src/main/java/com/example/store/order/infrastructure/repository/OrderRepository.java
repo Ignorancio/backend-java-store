@@ -1,4 +1,4 @@
-package com.example.store.order.infrastructure.repository.implementation;
+package com.example.store.order.infrastructure.repository;
 
 import com.example.store.order.infrastructure.entity.OrderEntity;
 import com.example.store.user.infrastructure.entity.UserEntity;

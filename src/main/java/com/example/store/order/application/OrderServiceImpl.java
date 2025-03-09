@@ -1,5 +1,6 @@
 package com.example.store.order.application;
 
+import com.example.store.order.infrastructure.repository.OrderDetailsRepository;
 import com.example.store.util.AuthUtil;
 import com.example.store.order.infrastructure.dto.OrderDetailsRequest;
 import com.example.store.order.infrastructure.dto.OrderDetailsResponse;
@@ -9,8 +10,7 @@ import com.example.store.order.infrastructure.entity.OrderEntity;
 import com.example.store.order.infrastructure.entity.OrderDetailsEntity;
 import com.example.store.product.infrastructure.entity.ProductEntity;
 import com.example.store.user.infrastructure.entity.UserEntity;
-import com.example.store.order.infrastructure.repository.implementation.OrderDetailsRepository;
-import com.example.store.order.infrastructure.repository.implementation.OrderRepository;
+import com.example.store.order.infrastructure.repository.OrderRepository;
 import com.example.store.product.infrastructure.repository.QueryProductRepository;
 import com.example.store.user.infrastructure.repository.QueryUserRepository;
 import lombok.RequiredArgsConstructor;
