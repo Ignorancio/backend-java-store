@@ -2,8 +2,6 @@ package com.example.store.product.application;
 
 import com.example.store.category.domain.CategoryRepository;
 import com.example.store.product.domain.*;
-import com.example.store.product.infrastructure.dto.*;
-import com.example.store.product.infrastructure.mapper.ProductMapper;
 import com.example.store.util.FileUploadUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -20,10 +18,8 @@ public class ProductServiceImpl implements ProductService{
     private final ProductRepository productRepository;
     private final ProductImageRepository productImageRepository;
     private final CategoryRepository categoryRepository;
-    private final ProductMapper productMapper;
 
-    public Product save(ProductDTO productDTO, MultipartFile file) {
-        Product product = productMapper.productDTOToProduct(productDTO);
+    public Product save(Product product, MultipartFile file) {
         if(!categoryRepository.existsByName(product.getCategory().getName())){
             product.setCategory(categoryRepository.save(product.getCategory()));
         }

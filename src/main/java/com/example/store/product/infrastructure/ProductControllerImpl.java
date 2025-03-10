@@ -3,6 +3,7 @@ package com.example.store.product.infrastructure;
 import com.example.store.product.domain.Product;
 import com.example.store.product.domain.ProductService;
 import com.example.store.product.infrastructure.dto.ProductDTO;
+import com.example.store.product.infrastructure.mapper.ProductMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,11 +20,13 @@ import java.util.Optional;
 public class ProductControllerImpl implements ProductController{
 
     private final ProductService productService;
+    private final ProductMapper productMapper;
 
     @PostMapping("/")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Product> save(@RequestPart("product") ProductDTO product,@RequestPart("file") MultipartFile file) {
-        Product productSaved = productService.save(product, file);
+        Product product1 = productMapper.productDTOToProduct(product);
+        Product productSaved = productService.save(product1, file);
         return ResponseEntity.status(HttpStatus.CREATED).body(productSaved);
     }
 
