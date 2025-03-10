@@ -16,7 +16,6 @@ import java.util.Optional;
 public class ProductServiceImpl implements ProductService{
 
     private final ProductRepository productRepository;
-    private final ProductImageRepository productImageRepository;
     private final CategoryRepository categoryRepository;
 
     public Product save(Product product, MultipartFile file) {
@@ -28,7 +27,7 @@ public class ProductServiceImpl implements ProductService{
         }
         String fileName = FileUploadUtil.uploadFile("/images", file);
         ProductImage productImage = ProductImage.builder().url("api/v1/products/images/"+fileName).build();
-        product.setProductImage(productImageRepository.save(productImage));
+        product.setProductImage(productImage);
         return productRepository.save(product);
     }
 

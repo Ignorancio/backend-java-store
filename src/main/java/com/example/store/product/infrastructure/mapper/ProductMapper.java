@@ -4,15 +4,13 @@ import com.example.store.category.domain.Category;
 import com.example.store.product.domain.Product;
 import com.example.store.product.infrastructure.dto.ProductDTO;
 import com.example.store.product.infrastructure.entity.ProductEntity;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
-import org.mapstruct.Named;
+import org.mapstruct.*;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface ProductMapper {
 
     Product productEntityToProduct(ProductEntity productEntity);
+
 
     ProductEntity productToProductEntity(Product productEntity);
 
@@ -27,5 +25,12 @@ public interface ProductMapper {
         return Category.builder()
                 .name(categoryName)
                 .build();
+    }
+
+    @AfterMapping
+    default void updateProductImage(@MappingTarget ProductEntity productEntity){
+        if(productEntity.getProductImage() != null){
+            productEntity.getProductImage().setProduct(productEntity);
+        }
     }
 }
