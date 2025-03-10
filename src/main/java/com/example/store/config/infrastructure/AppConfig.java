@@ -1,7 +1,5 @@
 package com.example.store.config.infrastructure;
 
-import com.example.store.user.domain.Role;
-import com.example.store.user.infrastructure.entity.UserEntity;
 import com.example.store.user.infrastructure.repository.QueryUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -22,17 +20,8 @@ public class AppConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> {
-            final UserEntity user = userRepository.findByEmail(username)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-            return org.springframework.security.core.userdetails.User.builder()
-                    .username(user.getUsername())
-                    .password(user.getPassword())
-                    .roles(user.getRoles().stream()
-                            .map(Role::name)
-                            .toArray(String[]::new))
-                    .build();
-        };
+        return username -> userRepository.findByEmail(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     @Bean
