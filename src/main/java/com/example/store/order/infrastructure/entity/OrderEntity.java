@@ -4,7 +4,6 @@ import com.example.store.user.infrastructure.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @NoArgsConstructor
@@ -29,6 +28,6 @@ public class OrderEntity {
     @Column(nullable = false)
     private String status;
 
-    @OneToMany(mappedBy = "order")
-    private List<OrderDetailsEntity> orderDetails= new ArrayList<>();
+    @OneToMany(mappedBy = "order", cascade = {CascadeType.PERSIST}, fetch = FetchType.EAGER)
+    private List<OrderDetailsEntity> orderDetails;
 }

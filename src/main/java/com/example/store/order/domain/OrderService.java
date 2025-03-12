@@ -13,5 +13,5 @@ public interface OrderService {
 
     List<Order> findByUserId(UUID userId);
 
-    void delete(Order order);
+    void delete(Long id);
 }

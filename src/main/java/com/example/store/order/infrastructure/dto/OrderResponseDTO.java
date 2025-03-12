@@ -4,12 +4,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
-public record OrderResponse(
+public record OrderResponseDTO(
         Long id,
-        String user,
         Double total,
         String status,
         @JsonProperty("order_details")
-        List<OrderDetailsResponse> orderDetails
+        List<OrderDetailsResponseDTO> orderDetails
 ) {
 }

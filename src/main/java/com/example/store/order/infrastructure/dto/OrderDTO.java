@@ -6,10 +6,10 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
-public record OrderRequest(
+public record OrderDTO(
         @JsonProperty("order_details")
         @NotNull(message = "No se agregaron productos a la orden")
         @Valid
-        List<OrderDetailsRequest> orderDetails
+        List<OrderDetailsDTO> orderDetails
 ) {
 }
