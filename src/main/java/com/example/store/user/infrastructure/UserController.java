@@ -1,6 +1,7 @@
 package com.example.store.user.infrastructure;
 
 import com.example.store.user.domain.User;
+import com.example.store.user.infrastructure.dto.UserDTO;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -10,9 +11,9 @@ public interface UserController {
 
     ResponseEntity<User> update(User user);
 
-    ResponseEntity<List<User>> findAll();
+    ResponseEntity<List<UserDTO>> findAll();
 
-    ResponseEntity<User> findById(UUID id);
+    ResponseEntity<UserDTO> findById(UUID id);
 
     ResponseEntity<Void> delete(UUID id);
 }
