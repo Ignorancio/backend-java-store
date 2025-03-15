@@ -4,6 +4,7 @@ import com.example.store.product.domain.Product;
 import com.example.store.product.domain.ProductService;
 import com.example.store.product.infrastructure.dto.ProductDTO;
 import com.example.store.product.infrastructure.mapper.ProductMapper;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +25,7 @@ public class ProductControllerImpl implements ProductController{
 
     @PostMapping("/")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Product> save(@RequestPart("product") ProductDTO product,@RequestPart("file") MultipartFile file) {
+    public ResponseEntity<Product> save(@Valid @RequestPart("product") ProductDTO product, @RequestPart("file") MultipartFile file) {
         Product product1 = productMapper.productDTOToProduct(product);
         Product productSaved = productService.save(product1, file);
         return ResponseEntity.status(HttpStatus.CREATED).body(productSaved);
