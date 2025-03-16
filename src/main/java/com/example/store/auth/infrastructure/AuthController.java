@@ -20,6 +20,12 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/register/admin")
+    public ResponseEntity<TokenResponse> registerAdmin(@Valid @RequestBody RegisterRequest request) {
+        final TokenResponse response = authService.registerAdmin(request);
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/login")
     public ResponseEntity<TokenResponse> authenticate(@Valid @RequestBody AuthRequest request) {
         final TokenResponse response = authService.authenticate(request);

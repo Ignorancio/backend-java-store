@@ -79,4 +79,21 @@ public class AuthService {
         final String accessToken = jwtService.generateRefreshToken(user);
         return new TokenResponse(accessToken, refreshToken);
     }
+
+    public TokenResponse registerAdmin(final RegisterRequest request) {
+        if(userRepository.existsByEmail(request.email())) {
+            throw new IllegalArgumentException("Usuario ya existe");
+        }
+        final UserEntity user = UserEntity.builder()
+                .email(request.email())
+                .password(passwordEncoder.encode(request.password()))
+                .roles(Set.of(Role.USER, Role.ADMIN))
+                .build();
+
+        final UserEntity savedUser = userRepository.save(user);
+        final String jwtToken = jwtService.generateToken(savedUser);
+        final String refreshToken = jwtService.generateRefreshToken(savedUser);
+
+        return new TokenResponse(jwtToken, refreshToken);
+    }
 }

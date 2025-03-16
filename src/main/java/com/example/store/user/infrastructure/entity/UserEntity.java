@@ -32,7 +32,7 @@ public class UserEntity implements UserDetails {
 
 
     @Enumerated(EnumType.STRING)
-    private Set<Role> roles = new HashSet<>();
+    private Set<Role> roles;
 
 
     @OneToMany(mappedBy = "user")
