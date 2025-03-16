@@ -128,10 +128,10 @@
 			<version>1.6.3</version>
 		</dependency>
 		<dependency>
-			<groupId>org.mapstruct</groupId>
-			<artifactId>mapstruct-processor</artifactId>
-			<version>1.6.3</version>
-            <scope>provided</scope>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok-mapstruct-binding</artifactId>
+			<version>0.2.0</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 
@@ -145,6 +145,17 @@
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
+						</path>
+						<path>
+							<groupId>org.mapstruct</groupId>
+							<artifactId>mapstruct-processor</artifactId>
+							<version>1.6.3</version>
+						</path>
+						<!-- Procesador de Lombok-MapStruct-Binding -->
+						<path>
+						<groupId>org.projectlombok</groupId>
+						<artifactId>lombok-mapstruct-binding</artifactId>
+						<version>0.2.0</version>
 						</path>
 					</annotationProcessorPaths>
 				</configuration>
