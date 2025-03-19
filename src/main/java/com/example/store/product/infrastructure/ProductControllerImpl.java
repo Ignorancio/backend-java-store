@@ -4,6 +4,9 @@ import com.example.store.product.domain.Product;
 import com.example.store.product.domain.ProductService;
 import com.example.store.product.infrastructure.dto.ProductDTO;
 import com.example.store.product.infrastructure.mapper.ProductMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,13 +21,15 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/v1/products")
 @RequiredArgsConstructor
+@Tag(name = "Product Services",description = "Operations related to products")
 public class ProductControllerImpl implements ProductController{
 
     private final ProductService productService;
     private final ProductMapper productMapper;
 
-    @PostMapping("/")
+    @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Create a new product")
     public ResponseEntity<Product> save(@Valid @RequestPart("product") ProductDTO product, @RequestPart("file") MultipartFile file) {
         Product product1 = productMapper.productDTOToProduct(product);
         Product productSaved = productService.save(product1, file);
@@ -32,12 +37,16 @@ public class ProductControllerImpl implements ProductController{
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Return a product by id")
+    @SecurityRequirements
     public ResponseEntity<Product> findById(@PathVariable Long id) {
         Product productSaved = productService.findById(id);
         return ResponseEntity.status(HttpStatus.OK).body(productSaved);
     }
 
-    @GetMapping("/")
+    @GetMapping
+    @Operation(summary = "Return all products")
+    @SecurityRequirements
     public ResponseEntity<List<Product>> findAll() {
         List<Product> products = productService.findAll();
         return ResponseEntity.status(HttpStatus.OK).body(products);
@@ -45,6 +54,7 @@ public class ProductControllerImpl implements ProductController{
 
     @PutMapping("/")
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Update a product")
     public ResponseEntity<Product> update(@RequestPart("product") Product product,@RequestPart(value = "file", required = false) Optional<MultipartFile> file) {
         Product productSaved = productService.update(product, file);
         return ResponseEntity.status(HttpStatus.OK).body(productSaved);
@@ -52,6 +62,7 @@ public class ProductControllerImpl implements ProductController{
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Delete a product by id")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         productService.deleteById(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
