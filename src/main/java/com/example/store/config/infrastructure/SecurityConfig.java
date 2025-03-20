@@ -36,7 +36,8 @@ public class SecurityConfig {
                                 "/actuator/**",
                                 "/api/v1/categories/**",
                                 "/api/v1/products/**",
-                                "/api/v1/**")
+                                "/api/v1/**",
+                                "/")
                                 .permitAll()
                         .requestMatchers(
                                 "/api/v1/orders/**",
