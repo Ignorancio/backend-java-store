@@ -23,7 +23,7 @@ public class CategoryControllerImpl implements CategoryController {
 
     private final CategoryService categoryService;
 
-    @PostMapping("/")
+    @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Create a new category")
     public ResponseEntity<Category> save(@Valid @RequestBody CategoryDTO category) {
@@ -31,7 +31,7 @@ public class CategoryControllerImpl implements CategoryController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedCategory);
     }
 
-    @GetMapping("/")
+    @GetMapping
     @Operation(summary = "Return all categories")
     @SecurityRequirements
     public ResponseEntity<List<Category>> findAll() {

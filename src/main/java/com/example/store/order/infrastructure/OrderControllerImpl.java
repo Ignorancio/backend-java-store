@@ -8,6 +8,8 @@ import com.example.store.order.infrastructure.dto.OrderResponseDTO;
 import com.example.store.order.infrastructure.mapper.OrderMapper;
 import com.example.store.user.infrastructure.entity.UserEntity;
 import com.example.store.user.infrastructure.mapper.UserMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,13 +23,15 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/orders")
 @RequiredArgsConstructor
+@Tag(name = "Order Services",description = "Operations related to orders")
 public class OrderControllerImpl implements OrderController{
 
     private final OrderServiceImpl orderService;
     private final OrderMapper orderMapper;
     private final UserMapper userMapper;
 
-    @PostMapping("/")
+    @PostMapping
+    @Operation(summary = "Create a new order")
     public ResponseEntity<OrderResponseDTO> save(@RequestBody @Valid OrderDTO orderDTO) {
         Order order = orderMapper.OrderDTOToOrder(orderDTO);
         Object auth = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -39,11 +43,13 @@ public class OrderControllerImpl implements OrderController{
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Return an order by order id, but you must be the owner or an administrator")
     public ResponseEntity<Order> findById(@PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(orderService.findById(id));
     }
 
-    @GetMapping("/")
+    @GetMapping
+    @Operation(summary = "Returns a list of all orders associated with the authenticated user")
     public ResponseEntity<List<OrderResponseDTO>> findByUserId() {
         Object auth = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if(auth instanceof UserEntity){
@@ -54,6 +60,7 @@ public class OrderControllerImpl implements OrderController{
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Delete a order by id, but you must be the owner or an administrator")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         orderService.delete(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -61,6 +68,7 @@ public class OrderControllerImpl implements OrderController{
 
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Retrieve all orders. This action is restricted to administrators only")
     public ResponseEntity<List<OrderResponseAdminDTO>> findAll() {
         return ResponseEntity.status(HttpStatus.OK).body(orderService.findAll().stream().map(orderMapper::OrderToOrderResponseAdminDTO).toList());
     }
