@@ -3,7 +3,7 @@ package com.example.store.order.application;
 import com.example.store.order.domain.*;
 import com.example.store.product.domain.Product;
 import com.example.store.product.domain.ProductRepository;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,16 +11,24 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderDetailsRepository orderDetailsRepository;
     private final ProductRepository productRepository;
 
+    public OrderServiceImpl(OrderRepository orderRepository,
+                            OrderDetailsRepository orderDetailsRepository,
+                            @Qualifier("postgresProductRepository") ProductRepository productRepository) {
+        this.orderRepository = orderRepository;
+        this.orderDetailsRepository = orderDetailsRepository;
+        this.productRepository = productRepository;
+    }
+
+
     public Order save(Order order) {
 
-        Double total = 0D;
+        double total = 0D;
 
         for (OrderDetails orderDetails : order.getOrderDetails()) {
 
@@ -59,6 +67,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Transactional
     public void delete(Long id) {
+        orderRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Order no encontrado"));
         orderDetailsRepository.deleteByOrderId(id);
         orderRepository.deleteById(id);
     }

@@ -1,8 +1,8 @@
 package com.example.store.product.infrastructure.mapper;
 
-import com.example.store.category.domain.Category;
 import com.example.store.product.domain.Product;
 import com.example.store.product.infrastructure.dto.ProductDTO;
+import com.example.store.product.infrastructure.entity.ProductCacheEntity;
 import com.example.store.product.infrastructure.entity.ProductEntity;
 import org.mapstruct.*;
 
@@ -14,18 +14,8 @@ public interface ProductMapper {
 
     ProductEntity productToProductEntity(Product productEntity);
 
-    @Mapping(source = "category", target = "category", qualifiedByName = "stringToCategory")
+    @Mapping(source = "category", target = "category.name")
     Product productDTOToProduct(ProductDTO productDTO);
-
-    @Named("stringToCategory")
-    default Category stringToCategory(String categoryName) {
-        if (categoryName == null) {
-            return null;
-        }
-        return Category.builder()
-                .name(categoryName)
-                .build();
-    }
 
     @AfterMapping
     default void updateProductImage(@MappingTarget ProductEntity productEntity){
@@ -33,4 +23,11 @@ public interface ProductMapper {
             productEntity.getProductImage().setProduct(productEntity);
         }
     }
+
+    ProductCacheEntity productToProductCacheEntity(Product product);
+
+    Product productCacheEntityToProduct(ProductCacheEntity productCacheEntity);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void copyProperties(Product source,@MappingTarget Product target);
 }
