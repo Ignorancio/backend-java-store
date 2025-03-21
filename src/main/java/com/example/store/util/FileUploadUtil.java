@@ -1,5 +1,6 @@
 package com.example.store.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -10,6 +11,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
+@Slf4j
 public class FileUploadUtil {
 
     public static String uploadFile(String directory, MultipartFile file) {
@@ -20,20 +22,26 @@ public class FileUploadUtil {
             try {
                 Files.createDirectories(uploadPath);
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error(e.getMessage());
+                throw new IllegalArgumentException("Failed to create directory");
             }
         }
 
 
         if (file.isEmpty()) {
-            throw new IllegalArgumentException("Imagen no encontrada");
+            throw new IllegalArgumentException("Image not found");
         }
 
         if (file.getOriginalFilename() == null) {
-            throw new IllegalArgumentException("Imagen no encontrada");
+            throw new IllegalArgumentException("Image not found");
         }
 
         String fileName = UUID.randomUUID().toString();
+
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || !originalFilename.contains(".")) {
+            throw new IllegalArgumentException("The file does not have a valid extension");
+        }
 
         String extension = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
 
@@ -41,7 +49,8 @@ public class FileUploadUtil {
             Path filePath = uploadPath.resolve(fileName+extension);
             Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
         }catch (IOException e){
-            e.printStackTrace();
+            log.error(e.getMessage());
+            throw new IllegalArgumentException("Failed to copy file");
         }
 
         return fileName+extension;
