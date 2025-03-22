@@ -3,6 +3,7 @@ package com.example.store.product.application;
 import com.example.store.category.domain.Category;
 import com.example.store.category.domain.CategoryRepository;
 import com.example.store.product.domain.*;
+import com.example.store.search.infrastructure.repository.implementation.SearchProductRepository;
 import com.example.store.util.FileUploadUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,13 +19,16 @@ public class ProductServiceImpl implements ProductService{
     private final ProductRepository queryProductRepository;
     private final ProductRepository cacheProductRepository;
     private final CategoryRepository categoryRepository;
+    private final SearchProductRepository searchProductRepository;
 
     public ProductServiceImpl(@Qualifier("postgresProductRepository") ProductRepository queryProductRepository,
                               @Qualifier("redisProductRepository") ProductRepository cacheProductRepository,
-                              CategoryRepository categoryRepository) {
+                              CategoryRepository categoryRepository,
+                              SearchProductRepository searchProductRepository) {
         this.queryProductRepository = queryProductRepository;
         this.cacheProductRepository = cacheProductRepository;
         this.categoryRepository = categoryRepository;
+        this.searchProductRepository = searchProductRepository;
     }
 
 
@@ -33,11 +37,14 @@ public class ProductServiceImpl implements ProductService{
         String fileName = FileUploadUtil.uploadFile("/images", file);
         ProductImage productImage = ProductImage.builder().url("api/v1/products/images/"+fileName).build();
         product.setProductImage(productImage);
-        cacheProductRepository.save(product);
-        return queryProductRepository.save(product);
+        Product saved = queryProductRepository.save(product);
+        cacheProductRepository.save(saved);
+        searchProductRepository.save(saved);
+        return saved;
     }
 
     public List<Product> findAll() {
+        //TODO implement persistence strategy
         List<Product> products = cacheProductRepository.findAll();
         if(!products.isEmpty()){
             return products;
@@ -70,8 +77,9 @@ public class ProductServiceImpl implements ProductService{
             ProductImage productImage = ProductImage.builder().url("api/v1/products/images/"+fileName).build();
             productdb.setProductImage(productImage);
         }
-        queryProductRepository.save(productdb);
-        return queryProductRepository.save(productdb);
+        Product saved = queryProductRepository.save(productdb);
+        cacheProductRepository.save(saved);
+        return saved;
     }
 
     public void deleteById(Long id) {
