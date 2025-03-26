@@ -20,21 +20,24 @@ public class ProductServiceImpl implements ProductService{
     private final ProductRepository cacheProductRepository;
     private final CategoryRepository categoryRepository;
     private final SearchProductRepository searchProductRepository;
+    private final FileUploadUtil fileUploadUtil;
 
     public ProductServiceImpl(@Qualifier("postgresProductRepository") ProductRepository queryProductRepository,
                               @Qualifier("redisProductRepository") ProductRepository cacheProductRepository,
                               CategoryRepository categoryRepository,
-                              SearchProductRepository searchProductRepository) {
+                              SearchProductRepository searchProductRepository,
+                              FileUploadUtil fileUploadUtil) {
         this.queryProductRepository = queryProductRepository;
         this.cacheProductRepository = cacheProductRepository;
         this.categoryRepository = categoryRepository;
         this.searchProductRepository = searchProductRepository;
+        this.fileUploadUtil = fileUploadUtil;
     }
 
 
     public Product save(Product product, MultipartFile file) {
         product.setCategory(findOrSaveCategory(product.getCategory()));
-        String fileName = FileUploadUtil.uploadFile("/images", file);
+        String fileName = fileUploadUtil.uploadFile("/images", file);
         ProductImage productImage = ProductImage.builder().url("api/v1/products/images/"+fileName).build();
         product.setProductImage(productImage);
         Product saved = queryProductRepository.save(product);
@@ -73,7 +76,7 @@ public class ProductServiceImpl implements ProductService{
         BeanUtils.copyProperties(product, productdb, "productImage");
         product.setCategory(findOrSaveCategory(productdb.getCategory()));
         if(file.isPresent() && file.get().getOriginalFilename() != null) {
-            String fileName = FileUploadUtil.uploadFile("/images", file.get());
+            String fileName = fileUploadUtil.uploadFile("/images", file.get());
             ProductImage productImage = ProductImage.builder().url("api/v1/products/images/"+fileName).build();
             productdb.setProductImage(productImage);
         }
