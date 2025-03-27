@@ -18,6 +18,8 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -77,5 +79,15 @@ public class ProductServiceTest {
 
         assertNotNull(product);
         assertEquals(product, PRODUCT_SAVED_PREPARED);
+    }
+
+    @Test
+    void findAll(){
+        Mockito.when(queryProductRepository.findAll()).thenReturn(Arrays.asList(PRODUCT_SAVED_PREPARED));
+
+        List<Product> products = productService.findAll();
+
+        assertNotNull(products);
+        assertEquals(1, products.size());
     }
 }
