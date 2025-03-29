@@ -1,0 +1,30 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://192.168.18.10:5432/postgres
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+        ddl-auto: update
+        naming:
+            physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  data:
+    redis:
+      repositories:
+        enabled: false
+    elasticsearch:
+      repositories:
+        enabled: true
+  elasticsearch:
+    uris: http://192.168.18.10:9201
+application:
+  security:
+    jwt:
+      secret-key: 8b7b2365441d0a07abed70ba5483fc9775a6408bc1263b9cf1ea8a5259241a0c796e01747f0d99fd09fd1afbb0fb4a5294c2bb1938dcdb85e39cfe6d1158966c1f21fd6c5906dac164490d5e45f90a54c4747896a9ac5f07b4276d23eabf3ec70e7f0ab9d592d05f6314c7288711dc25d58c4bbefb62d04985371f037e621773ec9705700d6fc876ccd30695ddc8aa0cb50e317023b6af32cf30d2f4c95e63a8b8ec9804dcfa4e1cd7ca7449f97221b4a2855967faef6efe152f3e258cc16c5c1eb11b064697e604c794ad1a229f03d68473c72fe32409ba411e1babf615e9cbf39d7ccf09712f08d4a07c57c7180e49da417456734023fe0d30520b52e0ff65
+      expiration: 86400000
+      refresh-token:
+        expiration: 604800000
