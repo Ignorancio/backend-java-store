@@ -34,7 +34,7 @@ public class ProductServiceImpl implements ProductService{
         this.fileUploadUtil = fileUploadUtil;
     }
 
-
+    //TODO implement event driven architecture for product commands
     public Product save(Product product, MultipartFile file) {
         product.setCategory(findOrSaveCategory(product.getCategory()));
         String fileName = fileUploadUtil.uploadFile("/images", file);
@@ -48,15 +48,7 @@ public class ProductServiceImpl implements ProductService{
 
     public List<Product> findAll() {
         //TODO implement persistence strategy
-        List<Product> products = cacheProductRepository.findAll();
-        if(!products.isEmpty()){
-            return products;
-        }
-        products = queryProductRepository.findAll();
-        if(!products.isEmpty()){
-            products.forEach(cacheProductRepository::save);
-        }
-        return products;
+        return cacheProductRepository.findAll();
     }
 
     public Product findById(Long id) {
