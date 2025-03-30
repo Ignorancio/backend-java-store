@@ -44,6 +44,8 @@ public class AuthService {
     }
 
     public TokenResponse authenticate(final AuthRequest request) {
+        final UserEntity user = userRepository.findByEmail(request.email())
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no existe"));
         try{
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -54,8 +56,6 @@ public class AuthService {
         }catch (AuthenticationException e){
             throw new IllegalArgumentException("Credenciales invalidas");
         }
-        final UserEntity user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
         final String accessToken = jwtService.generateToken(user);
         final String refreshToken = jwtService.generateRefreshToken(user);
         return new TokenResponse(accessToken, refreshToken);
