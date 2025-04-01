@@ -2,12 +2,15 @@ package com.example.store.product.infrastructure;
 
 import com.example.store.auth.infrastructure.RegisterRequest;
 import com.example.store.auth.infrastructure.TokenResponse;
+import com.example.store.category.infrastructure.repository.QueryCategoryRepository;
 import com.example.store.product.domain.Product;
 import com.example.store.product.infrastructure.dto.ProductDTO;
+import com.example.store.product.infrastructure.repository.CacheProductRepository;
+import com.example.store.product.infrastructure.repository.QueryProductImageRepository;
+import com.example.store.product.infrastructure.repository.QueryProductRepository;
+import com.example.store.user.infrastructure.repository.QueryUserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,17 +28,35 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ProductControllerImplTest {
 
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private CacheProductRepository cacheProductRepository;
+    @Autowired
+    private QueryProductRepository productRepository;
+    @Autowired
+    private QueryProductImageRepository productImageRepository;
+    @Autowired
+    private QueryCategoryRepository categoryRepository;
+    @Autowired
+    private QueryUserRepository userRepository;
+
     private static String JWT = "";
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    @BeforeEach
-    void setUp() throws Exception {
+    @BeforeAll
+    void setUpAll() throws Exception{
+
+        cacheProductRepository.deleteAll();
+        productImageRepository.deleteAll();
+        productRepository.deleteAll();
+        categoryRepository.deleteAll();
+        userRepository.deleteAll();
 
         RegisterRequest authRequest = new RegisterRequest("admin@admin", "admin");
 
@@ -52,6 +73,19 @@ class ProductControllerImplTest {
         TokenResponse response = objectMapper.readValue(jsonResponse, TokenResponse.class);
 
         JWT = response.accessToken();
+    }
+
+    @AfterEach
+    void tearDown() {
+        cacheProductRepository.deleteAll();
+        productImageRepository.deleteAll();
+        productRepository.deleteAll();
+        categoryRepository.deleteAll();
+    }
+
+    @AfterAll
+    void tearDownAll() {
+        userRepository.deleteAll();
     }
 
     @Test
