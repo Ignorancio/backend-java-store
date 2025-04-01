@@ -45,9 +45,11 @@ class ProductControllerImplTest {
     @Autowired
     private QueryUserRepository userRepository;
 
-    private static String JWT = "";
+    private String JWTAdmin = "";
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private String JWTUser = "";
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeAll
     void setUpAll() throws Exception{
@@ -72,7 +74,7 @@ class ProductControllerImplTest {
 
         TokenResponse response = objectMapper.readValue(jsonResponse, TokenResponse.class);
 
-        JWT = response.accessToken();
+        JWTAdmin = response.accessToken();
     }
 
     @AfterEach
@@ -101,7 +103,7 @@ class ProductControllerImplTest {
         MvcResult mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart("http://localhost:8080/api/v1/products")
                         .file(productFile)
                         .file(filePart)
-                        .header("Authorization", "Bearer " + JWT)
+                        .header("Authorization", "Bearer " + JWTAdmin)
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isCreated())
                 .andReturn();
