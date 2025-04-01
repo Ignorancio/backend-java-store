@@ -32,6 +32,6 @@ public class ProductEntity {
     private CategoryEntity category;
     @OneToMany(mappedBy = "product")
     private List<OrderDetailsEntity> orderDetails;
-    @OneToOne(mappedBy = "product", cascade = CascadeType.PERSIST)
+    @OneToOne(mappedBy = "product", cascade = {CascadeType.PERSIST,CascadeType.REMOVE})
     private ProductImageEntity productImage;
 }
