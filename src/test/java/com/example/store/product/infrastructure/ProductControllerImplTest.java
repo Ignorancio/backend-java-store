@@ -14,6 +14,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
@@ -123,8 +124,34 @@ class ProductControllerImplTest {
     }
 
     @Test
-    @Disabled
-    void findById() {
+    void findById() throws Exception {
+
+        ProductDTO productDTO = new ProductDTO("product 1", "description 1", 100.0, 100, "category 1");
+        String productJson = objectMapper.writeValueAsString(productDTO);
+
+        MockMultipartFile productFile = new MockMultipartFile("product","","application/json", productJson.getBytes());
+
+        MockMultipartFile filePart = new MockMultipartFile("file", "product1.jpg", "image/jpeg", "image content".getBytes());
+
+        MvcResult mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart("http://localhost:8080/api/v1/products")
+                        .file(productFile)
+                        .file(filePart)
+                        .header("Authorization", "Bearer " + JWTAdmin)
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String response = mockMvcResult.getResponse().getContentAsString();
+        Product product = objectMapper.readValue(response, Product.class);
+
+        MvcResult mvcResult = mockMvc.perform(get("/api/v1/products/" + product.getId()))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+        Product productResponse = objectMapper.readValue(jsonResponse, Product.class);
+
+        assertEquals(product, productResponse);
     }
 
     @Test
@@ -136,8 +163,56 @@ class ProductControllerImplTest {
     }
 
     @Test
-    @Disabled
-    void update() {
+    void updateWithoutImage () throws Exception {
+
+        ProductDTO productDTO = new ProductDTO("product 1", "description 1", 100.0, 100, "category 1");
+        String productJson = objectMapper.writeValueAsString(productDTO);
+
+        MockMultipartFile productFile = new MockMultipartFile("product","","application/json", productJson.getBytes());
+
+        MockMultipartFile filePart = new MockMultipartFile("file", "product1.jpg", "image/jpeg", "image content".getBytes());
+
+        MvcResult mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart("http://localhost:8080/api/v1/products")
+                        .file(productFile)
+                        .file(filePart)
+                        .header("Authorization", "Bearer " + JWTAdmin)
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String response = mockMvcResult.getResponse().getContentAsString();
+        Product product = objectMapper.readValue(response, Product.class);
+
+        ProductDTO productToUpdate = new ProductDTO("product 2",
+                "description 2",
+                200.0,
+                200,
+                "category 2");
+
+        String updatedProductJson = objectMapper.writeValueAsString(productToUpdate);
+
+        MockMultipartFile updatedProductFile = new MockMultipartFile("product","","application/json", updatedProductJson.getBytes());
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT,"/api/v1/products/"+product.getId().toString())
+                        .file(updatedProductFile)
+                        .header("Authorization", "Bearer " + JWTAdmin)
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+        Product updatedProductResponse = objectMapper.readValue(jsonResponse, Product.class);
+
+        assertNotNull(updatedProductResponse.getCategory().getId());
+
+        assertEquals(product.getId(), updatedProductResponse.getId());
+        assertEquals("product 2", updatedProductResponse.getName());
+        assertEquals("description 2", updatedProductResponse.getDescription());
+        assertEquals(200.0, updatedProductResponse.getPrice());
+        assertEquals(200, updatedProductResponse.getStock());
+        assertEquals("category 2", updatedProductResponse.getCategory().getName());
+        assertEquals(product.getProductImage().getId(), updatedProductResponse.getProductImage().getId());
+        assertEquals(product.getProductImage().getUrl(), updatedProductResponse.getProductImage().getUrl());
     }
 
     @Test

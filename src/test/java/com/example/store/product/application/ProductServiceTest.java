@@ -50,7 +50,8 @@ public class ProductServiceTest {
                 cacheProductRepository,
                 categoryRepository,
                 searchProductRepository,
-                fileUploadUtil
+                fileUploadUtil,
+                null
         );
     }
 
