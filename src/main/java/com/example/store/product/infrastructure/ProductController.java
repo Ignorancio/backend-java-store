@@ -16,7 +16,7 @@ public interface ProductController {
 
     ResponseEntity<List<Product>> findAll();
 
-    ResponseEntity<Product> update(Product product, Optional<MultipartFile> file);
+    ResponseEntity<Product> update(Long id,ProductDTO product, Optional<MultipartFile> file);
 
     ResponseEntity<Void> delete(Long id);
 }

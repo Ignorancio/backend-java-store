@@ -52,11 +52,15 @@ public class ProductControllerImpl implements ProductController{
         return ResponseEntity.status(HttpStatus.OK).body(products);
     }
 
-    @PutMapping("/")
+    @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Update a product")
-    public ResponseEntity<Product> update(@RequestPart("product") Product product,@RequestPart(value = "file", required = false) Optional<MultipartFile> file) {
-        Product productSaved = productService.update(product, file);
+    public ResponseEntity<Product> update(@PathVariable Long id,
+                                          @RequestPart("product") ProductDTO product,
+                                          @RequestPart(value = "file", required = false) Optional<MultipartFile> file) {
+        Product productToUpdate = productMapper.productDTOToProduct(product);
+        productToUpdate.setId(id);
+        Product productSaved = productService.update(productToUpdate, file);
         return ResponseEntity.status(HttpStatus.OK).body(productSaved);
     }
 

@@ -7,7 +7,7 @@ import com.example.store.product.infrastructure.entity.ProductEntity;
 import org.mapstruct.*;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
-public interface ProductMapper {
+public interface ProductMapper{
 
     Product productEntityToProduct(ProductEntity productEntity);
 
@@ -27,7 +27,4 @@ public interface ProductMapper {
     ProductCacheEntity productToProductCacheEntity(Product product);
 
     Product productCacheEntityToProduct(ProductCacheEntity productCacheEntity);
-
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void copyProperties(Product source,@MappingTarget Product target);
 }

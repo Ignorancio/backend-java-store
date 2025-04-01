@@ -5,7 +5,6 @@ import com.example.store.category.domain.CategoryRepository;
 import com.example.store.product.domain.*;
 import com.example.store.search.infrastructure.repository.implementation.SearchProductRepository;
 import com.example.store.util.FileUploadUtil;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,17 +20,20 @@ public class ProductServiceImpl implements ProductService{
     private final CategoryRepository categoryRepository;
     private final SearchProductRepository searchProductRepository;
     private final FileUploadUtil fileUploadUtil;
+    private final ProductUtils productUtils;
 
     public ProductServiceImpl(@Qualifier("postgresProductRepository") ProductRepository queryProductRepository,
                               @Qualifier("redisProductRepository") ProductRepository cacheProductRepository,
                               CategoryRepository categoryRepository,
                               SearchProductRepository searchProductRepository,
-                              FileUploadUtil fileUploadUtil) {
+                              FileUploadUtil fileUploadUtil,
+                              ProductUtils productUtils) {
         this.queryProductRepository = queryProductRepository;
         this.cacheProductRepository = cacheProductRepository;
         this.categoryRepository = categoryRepository;
         this.searchProductRepository = searchProductRepository;
         this.fileUploadUtil = fileUploadUtil;
+        this.productUtils = productUtils;
     }
 
     //TODO implement event driven architecture for product commands
@@ -65,8 +67,8 @@ public class ProductServiceImpl implements ProductService{
 
     public Product update(Product product, Optional<MultipartFile> file) {
         Product productdb = queryProductRepository.findById(product.getId()).orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
-        BeanUtils.copyProperties(product, productdb, "productImage");
-        product.setCategory(findOrSaveCategory(productdb.getCategory()));
+        productUtils.copyNonNullProperties(product, productdb);
+        productdb.setCategory(findOrSaveCategory(productdb.getCategory()));
         if(file.isPresent() && file.get().getOriginalFilename() != null) {
             String fileName = fileUploadUtil.uploadFile("/images", file.get());
             ProductImage productImage = ProductImage.builder().url("api/v1/products/images/"+fileName).build();
