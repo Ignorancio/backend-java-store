@@ -17,13 +17,6 @@ public interface ProductMapper{
     @Mapping(source = "category", target = "category.name")
     Product productDTOToProduct(ProductDTO productDTO);
 
-    @AfterMapping
-    default void updateProductImage(@MappingTarget ProductEntity productEntity){
-        if(productEntity.getProductImage() != null){
-            productEntity.getProductImage().setProduct(productEntity);
-        }
-    }
-
     ProductCacheEntity productToProductCacheEntity(Product product);
 
     Product productCacheEntityToProduct(ProductCacheEntity productCacheEntity);

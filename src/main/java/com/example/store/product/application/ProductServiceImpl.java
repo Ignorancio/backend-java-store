@@ -16,6 +16,7 @@ import java.util.Optional;
 public class ProductServiceImpl implements ProductService{
 
     private final ProductRepository queryProductRepository;
+    private final ProductImageRepository productImageRepository;
     private final ProductRepository cacheProductRepository;
     private final CategoryRepository categoryRepository;
     private final SearchProductRepository searchProductRepository;
@@ -23,12 +24,14 @@ public class ProductServiceImpl implements ProductService{
     private final ProductUtils productUtils;
 
     public ProductServiceImpl(@Qualifier("postgresProductRepository") ProductRepository queryProductRepository,
+                              ProductImageRepository productImageRepository,
                               @Qualifier("redisProductRepository") ProductRepository cacheProductRepository,
                               CategoryRepository categoryRepository,
                               SearchProductRepository searchProductRepository,
                               FileUploadUtil fileUploadUtil,
                               ProductUtils productUtils) {
         this.queryProductRepository = queryProductRepository;
+        this.productImageRepository = productImageRepository;
         this.cacheProductRepository = cacheProductRepository;
         this.categoryRepository = categoryRepository;
         this.searchProductRepository = searchProductRepository;
@@ -71,8 +74,8 @@ public class ProductServiceImpl implements ProductService{
         productdb.setCategory(findOrSaveCategory(productdb.getCategory()));
         if(file.isPresent() && file.get().getOriginalFilename() != null) {
             String fileName = fileUploadUtil.uploadFile("/images", file.get());
-            ProductImage productImage = ProductImage.builder().url("api/v1/products/images/"+fileName).build();
-            productdb.setProductImage(productImage);
+            productdb.getProductImage().setUrl("api/v1/products/images/"+fileName);
+            productImageRepository.save(productdb.getProductImage());
         }
         Product saved = queryProductRepository.save(productdb);
         cacheProductRepository.save(saved);

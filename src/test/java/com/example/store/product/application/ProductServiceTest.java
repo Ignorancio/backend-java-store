@@ -47,6 +47,7 @@ public class ProductServiceTest {
     void setUp() {
         productService = new ProductServiceImpl(
                 queryProductRepository,
+                null,
                 cacheProductRepository,
                 categoryRepository,
                 searchProductRepository,

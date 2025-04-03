@@ -56,8 +56,8 @@ class ProductControllerImplTest {
     void setUpAll() throws Exception{
 
         cacheProductRepository.deleteAll();
-        productImageRepository.deleteAll();
         productRepository.deleteAll();
+        productImageRepository.deleteAll();
         categoryRepository.deleteAll();
         userRepository.deleteAll();
 
@@ -81,8 +81,8 @@ class ProductControllerImplTest {
     @AfterEach
     void tearDown() {
         cacheProductRepository.deleteAll();
-        productImageRepository.deleteAll();
         productRepository.deleteAll();
+        productImageRepository.deleteAll();
         categoryRepository.deleteAll();
     }
 
@@ -101,7 +101,7 @@ class ProductControllerImplTest {
 
         MockMultipartFile filePart = new MockMultipartFile("file", "product1.jpg", "image/jpeg", "image content".getBytes());
 
-        MvcResult mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart("http://localhost:8080/api/v1/products")
+        MvcResult mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/products")
                         .file(productFile)
                         .file(filePart)
                         .header("Authorization", "Bearer " + JWTAdmin)
@@ -205,6 +205,8 @@ class ProductControllerImplTest {
 
         assertNotNull(updatedProductResponse.getCategory().getId());
 
+        assertNotEquals(product.getCategory().getId(), updatedProductResponse.getCategory().getId());
+
         assertEquals(product.getId(), updatedProductResponse.getId());
         assertEquals("product 2", updatedProductResponse.getName());
         assertEquals("description 2", updatedProductResponse.getDescription());
@@ -216,7 +218,89 @@ class ProductControllerImplTest {
     }
 
     @Test
-    @Disabled
-    void delete() {
+    void updateWithImage () throws Exception {
+
+        ProductDTO productDTO = new ProductDTO("product 1", "description 1", 100.0, 100, "category 1");
+        String productJson = objectMapper.writeValueAsString(productDTO);
+
+        MockMultipartFile productFile = new MockMultipartFile("product","","application/json", productJson.getBytes());
+
+        MockMultipartFile filePart = new MockMultipartFile("file", "product1.jpg", "image/jpeg", "image content".getBytes());
+
+        MvcResult mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart("http://localhost:8080/api/v1/products")
+                        .file(productFile)
+                        .file(filePart)
+                        .header("Authorization", "Bearer " + JWTAdmin)
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String response = mockMvcResult.getResponse().getContentAsString();
+        Product product = objectMapper.readValue(response, Product.class);
+
+        ProductDTO productToUpdate = new ProductDTO("product 2",
+                "description 2",
+                200.0,
+                200,
+                "category 2");
+
+        String updatedProductJson = objectMapper.writeValueAsString(productToUpdate);
+
+        MockMultipartFile updatedProductFile = new MockMultipartFile("product","","application/json", updatedProductJson.getBytes());
+
+        MockMultipartFile filePartUpdate = new MockMultipartFile("file", "product2.jpg", "image/jpeg", "image content update".getBytes());
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT,"/api/v1/products/"+product.getId().toString())
+                        .file(updatedProductFile)
+                        .file(filePartUpdate)
+                        .header("Authorization", "Bearer " + JWTAdmin)
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+        Product updatedProductResponse = objectMapper.readValue(jsonResponse, Product.class);
+
+        assertNotNull(updatedProductResponse.getCategory().getId());
+
+        assertNotEquals(product.getCategory().getId(), updatedProductResponse.getCategory().getId());
+        assertNotEquals(product.getProductImage().getUrl(), updatedProductResponse.getProductImage().getUrl());
+
+        assertEquals(product.getId(), updatedProductResponse.getId());
+        assertEquals("product 2", updatedProductResponse.getName());
+        assertEquals("description 2", updatedProductResponse.getDescription());
+        assertEquals(200.0, updatedProductResponse.getPrice());
+        assertEquals(200, updatedProductResponse.getStock());
+        assertEquals("category 2", updatedProductResponse.getCategory().getName());
+        assertEquals(product.getProductImage().getId(), updatedProductResponse.getProductImage().getId());
+    }
+
+    @Test
+    void delete() throws Exception {
+
+        ProductDTO productDTO = new ProductDTO("product 1", "description 1", 100.0, 100, "category 1");
+        String productJson = objectMapper.writeValueAsString(productDTO);
+
+        MockMultipartFile productFile = new MockMultipartFile("product","","application/json", productJson.getBytes());
+
+        MockMultipartFile filePart = new MockMultipartFile("file", "product1.jpg", "image/jpeg", "image content".getBytes());
+
+        MvcResult mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart("http://localhost:8080/api/v1/products")
+                        .file(productFile)
+                        .file(filePart)
+                        .header("Authorization", "Bearer " + JWTAdmin)
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String response = mockMvcResult.getResponse().getContentAsString();
+        Product product = objectMapper.readValue(response, Product.class);
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/products/"+product.getId().toString())
+                        .header("Authorization", "Bearer " + JWTAdmin))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(get("/api/v1/products/"+product.getId().toString()))
+                .andExpect(status().isBadRequest());
     }
 }

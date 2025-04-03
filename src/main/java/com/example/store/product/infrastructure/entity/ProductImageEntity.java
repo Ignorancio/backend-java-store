@@ -8,8 +8,8 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @Setter
-@EqualsAndHashCode(exclude = "product")
-@ToString(exclude = "product")
+@EqualsAndHashCode
+@ToString
 @Entity(name = "product_images")
 public class ProductImageEntity {
     @Id
@@ -17,7 +17,7 @@ public class ProductImageEntity {
     private Long id;
     @Column(nullable = false)
     private String url;
-    @OneToOne
-    @JoinColumn(name = "product_id")
-    private ProductEntity product;
+//    @OneToOne
+//    @JoinColumn(name = "product_id")
+//    private ProductEntity product;
 }
