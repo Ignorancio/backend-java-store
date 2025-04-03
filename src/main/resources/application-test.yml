@@ -2,7 +2,7 @@ spring:
   application:
     name: backend-test
   datasource:
-    url: jdbc:postgresql://192.168.18.10:5432/postgres
+    url: jdbc:postgresql://localhost:5432/springdb
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
@@ -15,14 +15,16 @@ spring:
     open-in-view: false
   data:
     redis:
-      host: 192.168.18.10
-      port: 6380
+      host: localhost
+      port: 6379
       timeout: 6000
     elasticsearch:
       repositories:
         enabled: true
   elasticsearch:
-    uris: http://192.168.18.10:9201
+    uris: http://localhost:9200
+    username: elastic
+    password: changeme
 application:
   security:
     jwt:

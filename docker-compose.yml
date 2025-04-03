@@ -15,6 +15,9 @@ services:
       DB_PASSWORD: postgres
       CACHE_URL: redis
       CACHE_PORT: 6379
+      ELASTIC_URL: http://elasticsearch:9200
+      ELASTIC_USER: elastic
+      ELASTIC_PASSWORD: changeme
     depends_on:
       database:
         condition: service_healthy
@@ -55,8 +58,18 @@ services:
   elasticsearch:
     image: elasticsearch:8.17.3
     restart: unless-stopped
+    environment:
+      - cluster.name=prod_cluster
+      - discovery.type=single-node
+      - ELASTIC_USERNAME=elastic
+      - ELASTIC_PASSWORD=changeme
+      - xpack.security.enabled=true
+      - xpack.security.http.ssl.enabled=false
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9200" ]
+      test: [ "CMD-SHELL", "curl -u elastic:changeme -X GET http://localhost:9200/_cluster/health?pretty" ]
+      interval: 15s
+      timeout: 15s
+      retries: 20
     ports:
       - "9200:9200"
       - "9300:9300"

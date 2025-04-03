@@ -24,7 +24,9 @@ spring:
       repositories:
         enabled: true
   elasticsearch:
-    uris: http://192.168.18.10:9201
+    uris: ${ELASTIC_URL}
+    username: ${ELASTIC_USER}
+    password: ${ELASTIC_PASSWORD}
 application:
   security:
     jwt:
