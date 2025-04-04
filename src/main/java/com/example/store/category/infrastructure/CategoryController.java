@@ -14,7 +14,7 @@ public interface CategoryController {
 
     ResponseEntity<Category> findById(Long id);
 
-    ResponseEntity<Category> update(Category category);
+    ResponseEntity<Category> update(Long id,CategoryDTO category);
 
     ResponseEntity<Void> delete(Long id);
 }

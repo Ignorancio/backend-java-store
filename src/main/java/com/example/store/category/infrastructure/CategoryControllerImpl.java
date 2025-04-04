@@ -49,11 +49,13 @@ public class CategoryControllerImpl implements CategoryController {
         return ResponseEntity.status(HttpStatus.OK).body(category);
     }
 
-    @PutMapping("/")
+    @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Update a category")
-    public ResponseEntity<Category> update(@Valid @RequestBody Category category) {
-        Category savedCategory = categoryService.update(category);
+    public ResponseEntity<Category> update(@PathVariable Long id,@Valid @RequestBody CategoryDTO category) {
+        Category category1 = categoryMapper.categoryDTOToCategory(category);
+        category1.setId(id);
+        Category savedCategory = categoryService.update(category1);
         return ResponseEntity.status(HttpStatus.OK).body(savedCategory);
     }
 
