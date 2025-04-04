@@ -121,6 +121,10 @@ class ProductControllerImplTest {
         assertEquals(100.0, product.getPrice());
         assertEquals(100, product.getStock());
         assertEquals("category 1", product.getCategory().getName());
+
+        assertEquals(1, productRepository.count());
+        assertEquals(1, productImageRepository.count());
+        assertEquals(1, categoryRepository.count());
     }
 
     @Test
@@ -302,5 +306,8 @@ class ProductControllerImplTest {
 
         mockMvc.perform(get("/api/v1/products/"+product.getId().toString()))
                 .andExpect(status().isBadRequest());
+
+        assertEquals(0, productRepository.count());
+        assertEquals(0, productImageRepository.count());
     }
 }
