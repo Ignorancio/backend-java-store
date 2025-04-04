@@ -3,7 +3,6 @@ package com.example.store.category.application;
 import com.example.store.category.domain.Category;
 import com.example.store.category.domain.CategoryRepository;
 import com.example.store.category.domain.CategoryService;
-import com.example.store.category.infrastructure.dto.CategoryDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,11 +14,10 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
 
-    public Category save(CategoryDTO categoryDTO) {
-        if(categoryRepository.existsByName(categoryDTO.name())) {
+    public Category save(Category category) {
+        if(categoryRepository.existsByName(category.getName())) {
             throw new IllegalArgumentException("Categoria ya existe");
         }
-        Category category = Category.builder().name(categoryDTO.name()).build();
         return categoryRepository.save(category);
     }
 

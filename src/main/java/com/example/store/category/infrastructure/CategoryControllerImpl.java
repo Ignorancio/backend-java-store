@@ -3,6 +3,7 @@ package com.example.store.category.infrastructure;
 import com.example.store.category.domain.Category;
 import com.example.store.category.domain.CategoryService;
 import com.example.store.category.infrastructure.dto.CategoryDTO;
+import com.example.store.category.infrastructure.mapper.CategoryMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,12 +23,14 @@ import java.util.List;
 public class CategoryControllerImpl implements CategoryController {
 
     private final CategoryService categoryService;
+    private final CategoryMapper categoryMapper;
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Create a new category")
     public ResponseEntity<Category> save(@Valid @RequestBody CategoryDTO category) {
-        Category savedCategory = categoryService.save(category);
+
+        Category savedCategory = categoryService.save(categoryMapper.categoryDTOToCategory(category));
         return ResponseEntity.status(HttpStatus.CREATED).body(savedCategory);
     }
 
