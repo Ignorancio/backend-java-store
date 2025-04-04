@@ -1,0 +1,81 @@
+# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Java CI with Maven
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    services:
+      database:
+        image: postgres:latest
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d springdb"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: springdb
+      redis:
+        image: redis:8.0-M04-alpine3.21
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 10s
+          --health-retries 5
+      elasticsearch:
+        image: elasticsearch:8.17.3
+        env:
+          cluster.name: test_cluster
+          discovery.type: single-node
+          ELASTIC_USERNAME: elastic
+          ELASTIC_PASSWORD: changeme
+          xpack.security.enabled: "true"
+          xpack.security.http.ssl.enabled: "false"
+        ports:
+          - 9200:9200
+          - 9300:9300
+        options: >-
+          --health-cmd "curl -u elastic:changeme -X GET http://localhost:9200/_cluster/health?pretty"
+          --health-interval 15s
+          --health-timeout 15s
+          --health-retries 20
+
+    env:
+      SPRING_PROFILES_ACTIVE: test
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+        
+    - name: Build with Maven    
+      run: mvn clean install
+
+    - name: Run tests
+      run: mvn test
