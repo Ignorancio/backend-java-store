@@ -17,7 +17,4 @@ public class ProductImageEntity {
     private Long id;
     @Column(nullable = false)
     private String url;
-//    @OneToOne
-//    @JoinColumn(name = "product_id")
-//    private ProductEntity product;
 }

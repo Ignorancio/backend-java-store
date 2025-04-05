@@ -1,19 +1,16 @@
 package com.example.store.product.infrastructure.entity;
 
 import com.example.store.category.infrastructure.entity.CategoryEntity;
-import com.example.store.order.infrastructure.entity.OrderDetailsEntity;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.List;
 
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-@EqualsAndHashCode(exclude = "orderDetails")
-@ToString(exclude = "orderDetails")
+@EqualsAndHashCode
+@ToString
 @Entity(name = "product")
 public class ProductEntity {
     @Id
@@ -30,8 +27,6 @@ public class ProductEntity {
     @ManyToOne
     @JoinColumn(name = "category_id")
     private CategoryEntity category;
-    @OneToMany(mappedBy = "product")
-    private List<OrderDetailsEntity> orderDetails;
     @OneToOne(cascade = {CascadeType.PERSIST,CascadeType.REMOVE},orphanRemoval = true)
     @JoinColumn(name = "product_image_id")
     private ProductImageEntity productImage;

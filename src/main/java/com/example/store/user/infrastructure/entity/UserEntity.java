@@ -1,6 +1,5 @@
 package com.example.store.user.infrastructure.entity;
 
-import com.example.store.order.infrastructure.entity.OrderEntity;
 import com.example.store.user.domain.Role;
 import jakarta.persistence.*;
 import lombok.*;
@@ -15,8 +14,8 @@ import java.util.*;
 @AllArgsConstructor
 @Getter
 @Setter
-@EqualsAndHashCode(exclude = "orders")
-@ToString(exclude = "orders")
+@EqualsAndHashCode
+@ToString
 @Entity(name = "usuarios")
 public class UserEntity implements UserDetails {
 
@@ -30,14 +29,8 @@ public class UserEntity implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-
     @Enumerated(EnumType.STRING)
     private Set<Role> roles;
-
-
-    @OneToMany(mappedBy = "user")
-    private List<OrderEntity> orders;
-
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
