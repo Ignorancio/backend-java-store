@@ -32,12 +32,12 @@ public class OrderControllerImpl implements OrderController{
 
     @PostMapping
     @Operation(summary = "Create a new order")
-    public ResponseEntity<OrderResponseDTO> save(@RequestBody @Valid OrderDTO orderDTO) {
+    public ResponseEntity<Order> save(@RequestBody @Valid OrderDTO orderDTO) {
         Order order = orderMapper.OrderDTOToOrder(orderDTO);
         Object auth = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if(auth instanceof UserEntity){
             order.setUser(userMapper.userEntityToUser((UserEntity) auth));
-            return ResponseEntity.status(HttpStatus.CREATED).body(orderMapper.OrderToOrderResponseDTO(orderService.save(order)));
+            return ResponseEntity.status(HttpStatus.CREATED).body(orderService.save(order));
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
     }

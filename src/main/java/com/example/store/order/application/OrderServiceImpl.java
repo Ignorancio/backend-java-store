@@ -25,7 +25,7 @@ public class OrderServiceImpl implements OrderService {
         this.productRepository = productRepository;
     }
 
-
+    @Transactional
     public Order save(Order order) {
 
         double total = 0D;
@@ -72,4 +72,17 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.deleteById(id);
     }
 
+    @Transactional
+    public Order addOrderDetails(Long orderId, List<OrderDetails> orderDetailsList) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new IllegalArgumentException("Order no encontrado"));
+        orderDetailsList.forEach(orderDetails -> {
+                Product product = productRepository.findById(orderDetails.getProduct().getId()).orElseThrow(() -> new IllegalArgumentException("Product no encontrado"));
+                orderDetails.setProduct(product);
+                orderDetails.setPrice(product.getPrice());
+                orderDetails.setOrder(order);
+                order.setTotal(order.getTotal() + orderDetails.getQuantity()*product.getPrice());
+                orderDetailsRepository.save(orderDetails);
+            });
+        return orderRepository.save(order); //orderDetailsRepository.save(orderDetails);
+    }
 }

@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface OrderController {
 
-    ResponseEntity<OrderResponseDTO> save(OrderDTO order);
+    ResponseEntity<Order> save(OrderDTO order);
 
     ResponseEntity<Order> findById(Long id);
 

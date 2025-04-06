@@ -14,4 +14,7 @@ public interface OrderService {
     List<Order> findByUserId(UUID userId);
 
     void delete(Long id);
+
+    Order addOrderDetails(Long orderId, List<OrderDetails> orderDetailsList);
+
 }
