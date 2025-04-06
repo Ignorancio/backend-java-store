@@ -28,6 +28,6 @@ public class OrderEntity {
     @Column(nullable = false)
     private String status;
 
-    @OneToMany(mappedBy = "order", cascade = {CascadeType.PERSIST}, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "order", cascade = {CascadeType.PERSIST,CascadeType.REMOVE}, fetch = FetchType.EAGER)
     private List<OrderDetailsEntity> orderDetails;
 }
