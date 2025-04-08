@@ -125,4 +125,52 @@ class OrderControllerImplTest(
         assertEquals(20.0, order.orderDetails[1].price)
 
     }
+
+    @Test
+    fun findByOrderIdWhenUserIsCreatorShouldReturnOrder(){
+        val orderDetailsDTO = listOf(
+            OrderDetailsDTO(product1.id, 10),
+            OrderDetailsDTO(product2.id, 15),
+        )
+
+        val orderDTO = OrderDTO(orderDetailsDTO)
+
+        val orderJson = objectMapper.writeValueAsString(orderDTO)
+
+        val mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/orders")
+                    .contentType("application/json")
+                    .content(orderJson)
+                    .header("Authorization", "Bearer $jwtUser"))
+            .andExpect(status().isCreated)
+            .andReturn()
+
+        val response = mockMvcResult.response.contentAsString
+        val order = objectMapper.readValue(response, Order::class.java)
+
+        val mockMvcFind = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/orders/${order.id}")
+                    .header("Authorization", "Bearer $jwtUser"))
+            .andExpect(status().isOk)
+            .andReturn()
+
+        val jsonResponse = mockMvcFind.response.contentAsString
+        val orderFind = objectMapper.readValue(jsonResponse, Order::class.java)
+
+        assertEquals(order.id, orderFind.id)
+        assertEquals(order.user, orderFind.user)
+        assertEquals(order.total, orderFind.total)
+        assertEquals(order.status, orderFind.status)
+
+        assertEquals(order.orderDetails[0].id, orderFind.orderDetails[0].id)
+        assertEquals(order.orderDetails[0].quantity, orderFind.orderDetails[0].quantity)
+        assertEquals(order.orderDetails[0].price, orderFind.orderDetails[0].price)
+
+        assertEquals(order.orderDetails[1].id, orderFind.orderDetails[1].id)
+        assertEquals(order.orderDetails[1].quantity, orderFind.orderDetails[1].quantity)
+        assertEquals(order.orderDetails[1].price, orderFind.orderDetails[1].price)
+
+        assertEquals(product1.id, orderFind.orderDetails[0].product.id)
+        assertEquals(90, orderFind.orderDetails[0].product.stock)
+        assertEquals(product2.id, orderFind.orderDetails[1].product.id)
+        assertEquals(185, orderFind.orderDetails[1].product.stock)
+    }
 }
