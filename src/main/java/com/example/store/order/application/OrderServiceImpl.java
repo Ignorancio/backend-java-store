@@ -42,7 +42,7 @@ public class OrderServiceImpl implements OrderService {
 
             product.setStock(product.getStock() - orderDetails.getQuantity());
             orderDetails.setPrice(product.getPrice());
-
+//            orderDetails.setOrder(order);
 
             productRepository.save(product);
         }
@@ -79,7 +79,7 @@ public class OrderServiceImpl implements OrderService {
                 Product product = productRepository.findById(orderDetails.getProduct().getId()).orElseThrow(() -> new IllegalArgumentException("Product no encontrado"));
                 orderDetails.setProduct(product);
                 orderDetails.setPrice(product.getPrice());
-                orderDetails.setOrder(order);
+//                orderDetails.setOrder(order);
                 order.setTotal(order.getTotal() + orderDetails.getQuantity()*product.getPrice());
                 orderDetailsRepository.save(orderDetails);
             });

@@ -6,13 +6,13 @@ import lombok.*;
 
 @Getter
 @Setter
-@ToString(exclude = "order")
+@ToString//(exclude = "order")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderDetails {
-    @JsonIgnore
-    private Order order;
+//    @JsonIgnore
+//    private Order order;
     private Long id;
     private Integer quantity;
     private Double price;

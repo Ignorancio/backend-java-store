@@ -6,6 +6,7 @@ import com.example.store.order.infrastructure.dto.OrderDTO;
 import com.example.store.order.infrastructure.dto.OrderResponseAdminDTO;
 import com.example.store.order.infrastructure.dto.OrderResponseDTO;
 import com.example.store.order.infrastructure.mapper.OrderMapper;
+import com.example.store.user.domain.Role;
 import com.example.store.user.infrastructure.entity.UserEntity;
 import com.example.store.user.infrastructure.mapper.UserMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,15 +46,23 @@ public class OrderControllerImpl implements OrderController{
     @GetMapping("/{id}")
     @Operation(summary = "Return an order by order id, but you must be the owner or an administrator")
     public ResponseEntity<Order> findById(@PathVariable Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(orderService.findById(id));
+        Object auth = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!(auth instanceof UserEntity userAuth)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+        Order order = orderService.findById(id);
+        if (!order.getUser().getId().equals(userAuth.getId()) && !userAuth.getRoles().contains(Role.ADMIN)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(order);
     }
 
     @GetMapping
     @Operation(summary = "Returns a list of all orders associated with the authenticated user")
     public ResponseEntity<List<OrderResponseDTO>> findByUserId() {
         Object auth = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if(auth instanceof UserEntity){
-            List<Order> orders = orderService.findByUserId(((UserEntity)auth).getId());
+        if(auth instanceof UserEntity userAuth){
+            List<Order> orders = orderService.findByUserId(userAuth.getId());
             return ResponseEntity.status(HttpStatus.OK).body(orders.stream().map(orderMapper::OrderToOrderResponseDTO).toList());
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);

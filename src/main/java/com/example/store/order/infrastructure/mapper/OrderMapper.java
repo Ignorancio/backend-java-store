@@ -14,6 +14,13 @@ public interface OrderMapper {
 
     OrderEntity OrderToOrderEntity(Order order);
 
+    @AfterMapping
+    default void updateOrderDetails(@MappingTarget OrderEntity orderEntity){
+        if(orderEntity.getOrderDetails() != null){
+            orderEntity.getOrderDetails().forEach(orderDetailsEntity -> orderDetailsEntity.setOrder(orderEntity));
+        }
+    }
+
     OrderDetails OrderDetailsEntityToOrderDetails(OrderDetailsEntity entity);
 
     OrderDetailsEntity OrderDetailsToOrderDetailsEntity(OrderDetails orderDetails);
