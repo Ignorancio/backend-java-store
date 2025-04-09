@@ -2,7 +2,6 @@ package com.example.store.order.infrastructure;
 
 import com.example.store.order.domain.Order;
 import com.example.store.order.infrastructure.dto.OrderDTO;
-import com.example.store.order.infrastructure.dto.OrderResponseAdminDTO;
 import com.example.store.order.infrastructure.dto.OrderResponseDTO;
 import org.springframework.http.ResponseEntity;
 
@@ -14,7 +13,7 @@ public interface OrderController {
 
     ResponseEntity<Order> findById(Long id);
 
-    ResponseEntity<List<OrderResponseAdminDTO>> findAll();
+    ResponseEntity<List<Order>> findAll();
 
     ResponseEntity<List<OrderResponseDTO>> findByUserId();
 

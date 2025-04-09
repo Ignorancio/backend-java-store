@@ -3,7 +3,6 @@ package com.example.store.order.infrastructure;
 import com.example.store.order.application.OrderServiceImpl;
 import com.example.store.order.domain.Order;
 import com.example.store.order.infrastructure.dto.OrderDTO;
-import com.example.store.order.infrastructure.dto.OrderResponseAdminDTO;
 import com.example.store.order.infrastructure.dto.OrderResponseDTO;
 import com.example.store.order.infrastructure.mapper.OrderMapper;
 import com.example.store.user.domain.Role;
@@ -78,7 +77,7 @@ public class OrderControllerImpl implements OrderController{
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Retrieve all orders. This action is restricted to administrators only")
-    public ResponseEntity<List<OrderResponseAdminDTO>> findAll() {
-        return ResponseEntity.status(HttpStatus.OK).body(orderService.findAll().stream().map(orderMapper::OrderToOrderResponseAdminDTO).toList());
+    public ResponseEntity<List<Order>> findAll() {
+        return ResponseEntity.status(HttpStatus.OK).body(orderService.findAll());
     }
 }

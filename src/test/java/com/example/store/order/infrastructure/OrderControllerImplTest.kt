@@ -41,6 +41,7 @@ class OrderControllerImplTest(
     @Autowired private val productMapper: ProductMapper
 ) {
     private var jwtUser: String = ""
+    private var jwtAdmin: String = ""
 
     private val objectMapper = ObjectMapper()
 
@@ -68,6 +69,19 @@ class OrderControllerImplTest(
         val jsonResponse = mvcResult.response.contentAsString
         val response = objectMapper.readValue(jsonResponse, TokenResponse::class.java)
         jwtUser = response.accessToken
+
+        val authRequestAdmin = RegisterRequest("admin@admin", "admin")
+        val jsonAdmin = objectMapper.writeValueAsString(authRequestAdmin)
+
+        val mvcResultAdmin = mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/admin")
+            .contentType("application/json")
+            .content(jsonAdmin))
+            .andExpect(status().isOk)
+            .andReturn()
+
+        val jsonResponseAdmin = mvcResultAdmin.response.contentAsString
+        val responseAdmin = objectMapper.readValue(jsonResponseAdmin, TokenResponse::class.java)
+        jwtAdmin = responseAdmin.accessToken
     }
 
     @BeforeEach
@@ -172,5 +186,36 @@ class OrderControllerImplTest(
         assertEquals(90, orderFind.orderDetails[0].product.stock)
         assertEquals(product2.id, orderFind.orderDetails[1].product.id)
         assertEquals(185, orderFind.orderDetails[1].product.stock)
+    }
+
+    @Test
+    fun findAllWhenUserIsAdminReturnAllOrders(){
+        val orderDetailsDTO = listOf(
+            OrderDetailsDTO(product1.id, 10),
+            OrderDetailsDTO(product2.id, 15),
+        )
+
+        val orderDTO = OrderDTO(orderDetailsDTO)
+
+        val orderJson = objectMapper.writeValueAsString(orderDTO)
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/orders")
+                    .contentType("application/json")
+                    .content(orderJson)
+                    .header("Authorization", "Bearer $jwtUser"))
+            .andExpect(status().isCreated)
+            .andReturn()
+
+        val mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/orders/all")
+                    .header("Authorization", "Bearer $jwtAdmin"))
+            .andExpect(status().isOk)
+            .andReturn()
+
+        val response = mvcResult.response.contentAsString
+        val order: List<Order> = objectMapper.readerForListOf(Order::class.java).readValue(response)
+
+        assertEquals(1, order.size)
+
+
     }
 }
