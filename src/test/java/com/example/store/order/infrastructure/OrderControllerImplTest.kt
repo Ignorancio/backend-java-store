@@ -40,8 +40,9 @@ class OrderControllerImplTest(
     @Autowired private val userRepository: QueryUserRepository,
     @Autowired private val productMapper: ProductMapper
 ) {
-    private var jwtUser: String = ""
-    private var jwtAdmin: String = ""
+    private lateinit var jwtUser: String
+    private lateinit var jwtUser2: String
+    private lateinit var jwtAdmin: String
 
     private val objectMapper = ObjectMapper()
 
@@ -69,6 +70,21 @@ class OrderControllerImplTest(
         val jsonResponse = mvcResult.response.contentAsString
         val response = objectMapper.readValue(jsonResponse, TokenResponse::class.java)
         jwtUser = response.accessToken
+
+
+        val authRequest2 = RegisterRequest("user2@user", "user2")
+        val json2 = objectMapper.writeValueAsString(authRequest2)
+
+        val mvcResult2 = mockMvc.perform(MockMvcRequestBuilders.post("/auth/register")
+            .contentType("application/json")
+            .content(json2))
+            .andExpect(status().isOk)
+            .andReturn()
+
+        val jsonResponse2 = mvcResult2.response.contentAsString
+        val response2 = objectMapper.readValue(jsonResponse2, TokenResponse::class.java)
+        jwtUser2 = response2.accessToken
+
 
         val authRequestAdmin = RegisterRequest("admin@admin", "admin")
         val jsonAdmin = objectMapper.writeValueAsString(authRequestAdmin)
@@ -186,6 +202,32 @@ class OrderControllerImplTest(
         assertEquals(90, orderFind.orderDetails[0].product.stock)
         assertEquals(product2.id, orderFind.orderDetails[1].product.id)
         assertEquals(185, orderFind.orderDetails[1].product.stock)
+    }
+
+    @Test
+    fun findByOrderIdWhenUserIsNotCreatorShouldReturnForbidden(){
+        val orderDetailsDTO = listOf(
+            OrderDetailsDTO(product1.id, 10),
+            OrderDetailsDTO(product2.id, 15),
+        )
+
+        val orderDTO = OrderDTO(orderDetailsDTO)
+
+        val orderJson = objectMapper.writeValueAsString(orderDTO)
+
+        val mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/orders")
+                    .contentType("application/json")
+                    .content(orderJson)
+                    .header("Authorization", "Bearer $jwtUser"))
+            .andExpect(status().isCreated)
+            .andReturn()
+
+        val response = mockMvcResult.response.contentAsString
+        val order = objectMapper.readValue(response, Order::class.java)
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/orders/${order.id}")
+            .header("Authorization", "Bearer $jwtUser2"))
+            .andExpect(status().isForbidden)
     }
 
     @Test
