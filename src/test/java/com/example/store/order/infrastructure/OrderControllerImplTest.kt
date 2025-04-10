@@ -189,6 +189,32 @@ class OrderControllerImplTest(
     }
 
     @Test
+    fun findByOrderIdWhenUserIsNotCreatorButIsAdminShouldReturnOrder() {
+        val orderDetailsDTO = listOf(
+            OrderDetailsDTO(product1.id, 10),
+            OrderDetailsDTO(product2.id, 15),
+        )
+
+        val orderDTO = OrderDTO(orderDetailsDTO)
+
+        val orderJson = objectMapper.writeValueAsString(orderDTO)
+
+        val mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/orders")
+            .contentType("application/json")
+            .content(orderJson)
+            .header("Authorization", "Bearer $jwtUser"))
+            .andExpect(status().isCreated)
+            .andReturn()
+
+        val response = mockMvcResult.response.contentAsString
+        val order = objectMapper.readValue(response, Order::class.java)
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/orders/${order.id}")
+            .header("Authorization", "Bearer $jwtAdmin"))
+            .andExpect(status().isOk)
+    }
+
+    @Test
     fun findAllWhenUserIsAdminReturnAllOrders(){
         val orderDetailsDTO = listOf(
             OrderDetailsDTO(product1.id, 10),
@@ -215,7 +241,5 @@ class OrderControllerImplTest(
         val order: List<Order> = objectMapper.readerForListOf(Order::class.java).readValue(response)
 
         assertEquals(1, order.size)
-
-
     }
 }
