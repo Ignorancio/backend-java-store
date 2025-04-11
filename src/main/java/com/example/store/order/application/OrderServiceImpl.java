@@ -42,7 +42,6 @@ public class OrderServiceImpl implements OrderService {
 
             product.setStock(product.getStock() - orderDetails.getQuantity());
             orderDetails.setPrice(product.getPrice());
-//            orderDetails.setOrder(order);
 
             productRepository.save(product);
         }
@@ -68,7 +67,6 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public void delete(Long id) {
         orderRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Order no encontrado"));
-        orderDetailsRepository.deleteByOrderId(id);
         orderRepository.deleteById(id);
     }
 
@@ -79,10 +77,9 @@ public class OrderServiceImpl implements OrderService {
                 Product product = productRepository.findById(orderDetails.getProduct().getId()).orElseThrow(() -> new IllegalArgumentException("Product no encontrado"));
                 orderDetails.setProduct(product);
                 orderDetails.setPrice(product.getPrice());
-//                orderDetails.setOrder(order);
                 order.setTotal(order.getTotal() + orderDetails.getQuantity()*product.getPrice());
                 orderDetailsRepository.save(orderDetails);
             });
-        return orderRepository.save(order); //orderDetailsRepository.save(orderDetails);
+        return orderRepository.save(order);
     }
 }

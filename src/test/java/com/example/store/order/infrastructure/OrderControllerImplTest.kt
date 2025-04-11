@@ -312,4 +312,36 @@ class OrderControllerImplTest(
 
         assertEquals(1, order.size)
     }
+
+    @Test
+    fun deleteOrderByIdWhenUserIsCreatorShouldDeleteOrder() {
+        val orderDetailsDTO = listOf(
+            OrderDetailsDTO(product1.id, 10),
+            OrderDetailsDTO(product2.id, 15),
+        )
+
+        val orderDTO = OrderDTO(orderDetailsDTO)
+
+        val orderJson = objectMapper.writeValueAsString(orderDTO)
+
+        val mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/orders")
+                    .contentType("application/json")
+                    .content(orderJson)
+                    .header("Authorization", "Bearer $jwtUser"))
+            .andExpect(status().isCreated)
+            .andReturn()
+
+        val response = mockMvcResult.response.contentAsString
+        val order = objectMapper.readValue(response, Order::class.java)
+
+        assertEquals(1, orderRepository.count())
+        assertEquals(2, orderDetailsRepository.count())
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/orders/${order.id}")
+            .header("Authorization", "Bearer $jwtUser"))
+            .andExpect(status().isNoContent)
+
+        assertEquals(0, orderRepository.count())
+        assertEquals(0, orderDetailsRepository.count())
+    }
 }

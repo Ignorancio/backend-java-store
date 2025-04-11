@@ -68,6 +68,14 @@ public class OrderControllerImpl implements OrderController{
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a order by id, but you must be the owner or an administrator")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
+        Object auth = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!(auth instanceof UserEntity userAuth)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+        Order order = orderService.findById(id);
+        if (!order.getUser().getId().equals(userAuth.getId()) && !userAuth.getRoles().contains(Role.ADMIN)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
         orderService.delete(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
