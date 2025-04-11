@@ -85,7 +85,6 @@ class OrderControllerImplTest(
         val response2 = objectMapper.readValue(jsonResponse2, TokenResponse::class.java)
         jwtUser2 = response2.accessToken
 
-
         val authRequestAdmin = RegisterRequest("admin@admin", "admin")
         val jsonAdmin = objectMapper.writeValueAsString(authRequestAdmin)
 
@@ -254,6 +253,35 @@ class OrderControllerImplTest(
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/orders/${order.id}")
             .header("Authorization", "Bearer $jwtAdmin"))
             .andExpect(status().isOk)
+    }
+
+    @Test
+    fun findByUserIdShouldReturnOrdersAssociatedWithUserId() {
+        val orderDetailsDTO = listOf(
+            OrderDetailsDTO(product1.id, 10),
+            OrderDetailsDTO(product2.id, 15),
+        )
+
+        val orderDTO = OrderDTO(orderDetailsDTO)
+
+        val orderJson = objectMapper.writeValueAsString(orderDTO)
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/orders")
+                    .contentType("application/json")
+                    .content(orderJson)
+                    .header("Authorization", "Bearer $jwtUser"))
+            .andExpect(status().isCreated)
+            .andReturn()
+
+        val mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/orders")
+                    .header("Authorization", "Bearer $jwtUser"))
+            .andExpect(status().isOk)
+            .andReturn()
+
+        val response = mvcResult.response.contentAsString
+        val order: List<Order> = objectMapper.readerForListOf(Order::class.java).readValue(response)
+
+        assertEquals(1, order.size)
     }
 
     @Test
