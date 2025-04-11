@@ -3,7 +3,6 @@ package com.example.store.order.infrastructure;
 import com.example.store.order.application.OrderServiceImpl;
 import com.example.store.order.domain.Order;
 import com.example.store.order.infrastructure.dto.OrderDTO;
-import com.example.store.order.infrastructure.dto.OrderResponseDTO;
 import com.example.store.order.infrastructure.mapper.OrderMapper;
 import com.example.store.user.domain.Role;
 import com.example.store.user.infrastructure.entity.UserEntity;
@@ -58,11 +57,10 @@ public class OrderControllerImpl implements OrderController{
 
     @GetMapping
     @Operation(summary = "Returns a list of all orders associated with the authenticated user")
-    public ResponseEntity<List<OrderResponseDTO>> findByUserId() {
+    public ResponseEntity<List<Order>> findByUserId() {
         Object auth = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if(auth instanceof UserEntity userAuth){
-            List<Order> orders = orderService.findByUserId(userAuth.getId());
-            return ResponseEntity.status(HttpStatus.OK).body(orders.stream().map(orderMapper::OrderToOrderResponseDTO).toList());
+            return ResponseEntity.status(HttpStatus.OK).body(orderService.findByUserId(userAuth.getId()));
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
     }
