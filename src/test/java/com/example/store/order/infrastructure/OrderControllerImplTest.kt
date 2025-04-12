@@ -153,6 +153,8 @@ class OrderControllerImplTest(
         assertEquals(10.0, order.orderDetails[0].price)
         assertEquals(20.0, order.orderDetails[1].price)
 
+        assertEquals(1, orderRepository.count())
+        assertEquals(2, orderDetailsRepository.count())
     }
 
     @Test
@@ -314,6 +316,13 @@ class OrderControllerImplTest(
     }
 
     @Test
+    fun findAllWhenUserIsNotAdminReturnForbidden(){
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/orders/all")
+            .header("Authorization", "Bearer $jwtUser"))
+            .andExpect(status().isForbidden)
+    }
+
+    @Test
     fun deleteOrderByIdWhenUserIsCreatorShouldDeleteOrder() {
         val orderDetailsDTO = listOf(
             OrderDetailsDTO(product1.id, 10),
@@ -334,11 +343,66 @@ class OrderControllerImplTest(
         val response = mockMvcResult.response.contentAsString
         val order = objectMapper.readValue(response, Order::class.java)
 
-        assertEquals(1, orderRepository.count())
-        assertEquals(2, orderDetailsRepository.count())
-
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/orders/${order.id}")
             .header("Authorization", "Bearer $jwtUser"))
+            .andExpect(status().isNoContent)
+
+        assertEquals(0, orderRepository.count())
+        assertEquals(0, orderDetailsRepository.count())
+    }
+    
+    @Test
+    fun deleteOrderByIdWhenUserIsNotCreatorShouldReturnForbidden() {
+        val orderDetailsDTO = listOf(
+            OrderDetailsDTO(product1.id, 10),
+            OrderDetailsDTO(product2.id, 15),
+        )
+
+        val orderDTO = OrderDTO(orderDetailsDTO)
+
+        val orderJson = objectMapper.writeValueAsString(orderDTO)
+
+        val mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/orders")
+                    .contentType("application/json")
+                    .content(orderJson)
+                    .header("Authorization", "Bearer $jwtUser"))
+            .andExpect(status().isCreated)
+            .andReturn()
+
+        val response = mockMvcResult.response.contentAsString
+        val order = objectMapper.readValue(response, Order::class.java)
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/orders/${order.id}")
+            .header("Authorization", "Bearer $jwtUser2"))
+            .andExpect(status().isForbidden)
+
+        assertEquals(1, orderRepository.count())
+        assertEquals(2, orderDetailsRepository.count())
+    }
+
+    @Test
+    fun deleteOrderByIdWhenUserIsNotCreatorButIsAdminShouldDeleteOrder() {
+        val orderDetailsDTO = listOf(
+            OrderDetailsDTO(product1.id, 10),
+            OrderDetailsDTO(product2.id, 15),
+        )
+
+        val orderDTO = OrderDTO(orderDetailsDTO)
+
+        val orderJson = objectMapper.writeValueAsString(orderDTO)
+
+        val mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/orders")
+                    .contentType("application/json")
+                    .content(orderJson)
+                    .header("Authorization", "Bearer $jwtUser"))
+            .andExpect(status().isCreated)
+            .andReturn()
+
+        val response = mockMvcResult.response.contentAsString
+        val order = objectMapper.readValue(response, Order::class.java)
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/orders/${order.id}")
+            .header("Authorization", "Bearer $jwtAdmin"))
             .andExpect(status().isNoContent)
 
         assertEquals(0, orderRepository.count())
