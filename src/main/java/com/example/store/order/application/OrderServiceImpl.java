@@ -73,6 +73,9 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public Order addOrderDetails(Long orderId, List<OrderDetails> orderDetailsList) {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new IllegalArgumentException("Order no encontrado"));
+        if(!order.getStatus().equals("PENDING")) {
+            throw new IllegalStateException("No se puede agregar mas productos a la orden");
+        }
         orderDetailsList.forEach(orderDetails -> {
                 Product product = productRepository.findById(orderDetails.getProduct().getId()).orElseThrow(() -> new IllegalArgumentException("Product no encontrado"));
                 orderDetails.setProduct(product);
