@@ -27,15 +27,6 @@ public interface OrderMapper {
 
     Order OrderDTOToOrder(OrderDTO orderDTO);
 
-    OrderResponseDTO OrderToOrderResponseDTO(Order order);
-
     @Mapping(source = "productId", target = "product.id")
     OrderDetails orderdetailsDTOToOrderDetails(OrderDetailsDTO orderDetailsDTO);
-
-    @Mapping(source = "product.name",target = "productName")
-    OrderDetailsResponseDTO OrderDetailsToOrderDetailsResponseDTO(OrderDetails orderDetails);
-
-    @Mapping(source = "user.email", target = "userEmail")
-    OrderResponseAdminDTO OrderToOrderResponseAdminDTO(Order order);
-
 }
