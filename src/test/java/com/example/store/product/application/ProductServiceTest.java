@@ -6,7 +6,7 @@ import com.example.store.product.domain.Product;
 import com.example.store.product.domain.ProductImage;
 import com.example.store.product.domain.ProductRepository;
 import com.example.store.search.infrastructure.repository.implementation.SearchProductRepository;
-import com.example.store.util.FileUploadUtil;
+import com.example.store.util.FileUpload;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,7 +35,7 @@ public class ProductServiceTest {
     private CategoryRepository categoryRepository;
 
     @Mock
-    private FileUploadUtil fileUploadUtil;
+    private FileUpload fileUpload;
 
     @Mock
     private SearchProductRepository searchProductRepository;
@@ -51,7 +51,7 @@ public class ProductServiceTest {
                 cacheProductRepository,
                 categoryRepository,
                 searchProductRepository,
-                fileUploadUtil,
+                fileUpload,
                 null
         );
     }
@@ -81,7 +81,7 @@ public class ProductServiceTest {
                 .build();
 
         Mockito.when(categoryRepository.save(PRODUCT_BASE_PREPARED.getCategory())).thenReturn(Category.builder().id(1L).name(PRODUCT_BASE_PREPARED.getCategory().getName()).build());
-        Mockito.when(fileUploadUtil.uploadFile("/images",MULTIPART_FILE_PREPARED)).thenReturn("test.jpg");
+        Mockito.when(fileUpload.uploadFile("/images",MULTIPART_FILE_PREPARED)).thenReturn("test.jpg");
         Mockito.when(queryProductRepository.save(PRODUCT_BASE_PREPARED)).thenReturn(PRODUCT_SAVED_PREPARED);
 
         Product product = productService.save(PRODUCT_BASE_PREPARED, MULTIPART_FILE_PREPARED);

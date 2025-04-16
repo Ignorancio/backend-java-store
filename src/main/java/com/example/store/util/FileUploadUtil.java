@@ -1,6 +1,7 @@
 package com.example.store.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,9 +15,10 @@ import java.util.UUID;
 
 @Slf4j
 @Component
-public class FileUploadUtil {
+public class FileUploadUtil implements FileUpload{
 
-    public String uploadFile(String directory, MultipartFile file) {
+    @NonNull
+    public String uploadFile(@NonNull String directory,@NonNull MultipartFile file) {
 
         Path uploadPath = Paths.get("src/main/resources" + directory);
 
