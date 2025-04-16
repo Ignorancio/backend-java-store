@@ -8,6 +8,7 @@ import com.example.store.product.infrastructure.repository.CacheProductRepositor
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,5 +34,12 @@ public class RedisProductRepository implements ProductRepository {
 
     public List<Product> findAll() {
         return cacheProductRepository.findAll().stream().map(productMapper::productCacheEntityToProduct).toList();
+    }
+
+    public List<Product> findAllById(List<Long> ids) {
+        List<Product> products = new ArrayList<>();
+        cacheProductRepository.findAllById(ids).forEach(entity ->
+                products.add(productMapper.productCacheEntityToProduct(entity)));
+        return products;
     }
 }

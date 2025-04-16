@@ -34,4 +34,8 @@ public class PostgresProductRepository implements ProductRepository {
     public List<Product> findAll() {
         return queryProductRepository.findAll().stream().map(productMapper::productEntityToProduct).toList();
     }
+
+    public List<Product> findAllById(List<Long> ids) {
+        return queryProductRepository.findAllById(ids).stream().map(productMapper::productEntityToProduct).toList();
+    }
 }
