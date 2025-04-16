@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,18 +29,26 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public Order save(Order order) {
 
+        List<Long> productIds = order.getOrderDetails().stream()
+                .map(orderDetails -> orderDetails.getProduct().getId())
+                .toList();
+
+        List<Product> products = productRepository.findAllById(productIds);
+        HashMap<Long, Product> productMap = new HashMap<>();
+        products.forEach(product -> productMap.put(product.getId(), product));
+
         double total = 0D;
 
         for (OrderDetails orderDetails : order.getOrderDetails()) {
-
-            Product product = productRepository.findById(orderDetails.getProduct().getId()).orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
-            orderDetails.setProduct(product);
-            total += product.getPrice() * orderDetails.getQuantity();
-
+            Product product = productMap.get(orderDetails.getProduct().getId());
+            if (product == null) {
+                throw new IllegalArgumentException("Product no encontrado");
+            }
             if(product.getStock() < orderDetails.getQuantity()) {
                 throw new IllegalStateException("Stock insuficiente");
             }
-
+            orderDetails.setProduct(product);
+            total += product.getPrice() * orderDetails.getQuantity();
             product.setStock(product.getStock() - orderDetails.getQuantity());
             orderDetails.setPrice(product.getPrice());
 
