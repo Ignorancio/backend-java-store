@@ -119,7 +119,7 @@ class OrderControllerImplTest(
     }
 
     @Test
-    fun save(){
+    fun saveReturnOrder(){
         val orderDetailsDTO = listOf(
             OrderDetailsDTO(product1.id, 10),
             OrderDetailsDTO(product2.id, 15),
@@ -155,6 +155,71 @@ class OrderControllerImplTest(
 
         assertEquals(1, orderRepository.count())
         assertEquals(2, orderDetailsRepository.count())
+    }
+
+    @Test
+    fun saveWhenUserIsNotAuthenticatedShouldReturnUnauthorized(){
+        val orderDetailsDTO = listOf(
+            OrderDetailsDTO(product1.id, 10),
+            OrderDetailsDTO(product2.id, 15),
+        )
+
+        val orderDTO = OrderDTO(orderDetailsDTO)
+
+        val orderJson = objectMapper.writeValueAsString(orderDTO)
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/orders")
+                    .contentType("application/json")
+                    .content(orderJson))
+            .andExpect(status().isBadRequest)
+
+        assertEquals(0, orderRepository.count())
+        assertEquals(0, orderDetailsRepository.count())
+    }
+
+    @Test
+    fun saveWhenProductStockIsNotEnoughShouldReturnBadRequest(){
+        val orderDetailsDTO = listOf(
+            OrderDetailsDTO(product1.id, 1000),
+            OrderDetailsDTO(product2.id, 15),
+        )
+
+        val orderDTO = OrderDTO(orderDetailsDTO)
+
+        val orderJson = objectMapper.writeValueAsString(orderDTO)
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/orders")
+                    .contentType("application/json")
+                    .content(orderJson)
+                    .header("Authorization", "Bearer $jwtUser"))
+            .andExpect(status().isBadRequest)
+
+        assertEquals(0, orderRepository.count())
+        assertEquals(0, orderDetailsRepository.count())
+
+        assertEquals(100,productRepository.findById(product1.id).get().stock)
+        assertEquals(200,productRepository.findById(product2.id).get().stock)
+    }
+
+    @Test
+    fun saveWhenProductIdDoesNotExistShouldReturnBadRequest(){
+        val orderDetailsDTO = listOf(
+            OrderDetailsDTO(product1.id+3, 10),
+            OrderDetailsDTO(product2.id, 15),
+        )
+
+        val orderDTO = OrderDTO(orderDetailsDTO)
+
+        val orderJson = objectMapper.writeValueAsString(orderDTO)
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/orders")
+                    .contentType("application/json")
+                    .content(orderJson)
+                    .header("Authorization", "Bearer $jwtUser"))
+            .andExpect(status().isBadRequest)
+
+        assertEquals(0, orderRepository.count())
+        assertEquals(0, orderDetailsRepository.count())
     }
 
     @Test
