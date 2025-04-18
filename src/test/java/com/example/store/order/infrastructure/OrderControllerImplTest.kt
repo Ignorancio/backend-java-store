@@ -352,6 +352,12 @@ class OrderControllerImplTest(
     }
 
     @Test
+    fun findByUserIdWhenUserIsNotAuthenticatedShouldReturnUnauthorized() {
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/orders"))
+            .andExpect(status().isBadRequest)
+    }
+
+    @Test
     fun findAllWhenUserIsAdminReturnAllOrders(){
         val orderDetailsDTO = listOf(
             OrderDetailsDTO(product1.id, 10),
