@@ -46,9 +46,9 @@ class ProductControllerImplTest {
     @Autowired
     private QueryUserRepository userRepository;
 
-    private String JWTAdmin = "";
+    private String jwtAdmin = "";
 
-    private String JWTUser = "";
+    private String jwtUser = "";
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -75,7 +75,23 @@ class ProductControllerImplTest {
 
         TokenResponse response = objectMapper.readValue(jsonResponse, TokenResponse.class);
 
-        JWTAdmin = response.accessToken();
+        jwtAdmin = response.accessToken();
+
+        RegisterRequest authRequestUser = new RegisterRequest("user@user", "user");
+
+        String jsonUser = objectMapper.writeValueAsString(authRequestUser);
+
+        MvcResult mvcResultUser = mockMvc.perform(MockMvcRequestBuilders.post("http://localhost:8080/auth/register")
+                        .contentType("application/json")
+                        .content(jsonUser))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String jsonResponseUser = mvcResultUser.getResponse().getContentAsString();
+
+        TokenResponse responseUser = objectMapper.readValue(jsonResponseUser, TokenResponse.class);
+
+        jwtUser = responseUser.accessToken();
     }
 
     @AfterEach
@@ -104,7 +120,7 @@ class ProductControllerImplTest {
         MvcResult mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/products")
                         .file(productFile)
                         .file(filePart)
-                        .header("Authorization", "Bearer " + JWTAdmin)
+                        .header("Authorization", "Bearer " + jwtAdmin)
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isCreated())
                 .andReturn();
@@ -140,7 +156,7 @@ class ProductControllerImplTest {
         MvcResult mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart("http://localhost:8080/api/v1/products")
                         .file(productFile)
                         .file(filePart)
-                        .header("Authorization", "Bearer " + JWTAdmin)
+                        .header("Authorization", "Bearer " + jwtAdmin)
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isCreated())
                 .andReturn();
@@ -179,7 +195,7 @@ class ProductControllerImplTest {
         MvcResult mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart("http://localhost:8080/api/v1/products")
                         .file(productFile)
                         .file(filePart)
-                        .header("Authorization", "Bearer " + JWTAdmin)
+                        .header("Authorization", "Bearer " + jwtAdmin)
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isCreated())
                 .andReturn();
@@ -199,7 +215,7 @@ class ProductControllerImplTest {
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT,"/api/v1/products/"+product.getId().toString())
                         .file(updatedProductFile)
-                        .header("Authorization", "Bearer " + JWTAdmin)
+                        .header("Authorization", "Bearer " + jwtAdmin)
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -234,7 +250,7 @@ class ProductControllerImplTest {
         MvcResult mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart("http://localhost:8080/api/v1/products")
                         .file(productFile)
                         .file(filePart)
-                        .header("Authorization", "Bearer " + JWTAdmin)
+                        .header("Authorization", "Bearer " + jwtAdmin)
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isCreated())
                 .andReturn();
@@ -257,7 +273,7 @@ class ProductControllerImplTest {
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT,"/api/v1/products/"+product.getId().toString())
                         .file(updatedProductFile)
                         .file(filePartUpdate)
-                        .header("Authorization", "Bearer " + JWTAdmin)
+                        .header("Authorization", "Bearer " + jwtAdmin)
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -292,7 +308,7 @@ class ProductControllerImplTest {
         MvcResult mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart("http://localhost:8080/api/v1/products")
                         .file(productFile)
                         .file(filePart)
-                        .header("Authorization", "Bearer " + JWTAdmin)
+                        .header("Authorization", "Bearer " + jwtAdmin)
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isCreated())
                 .andReturn();
@@ -301,7 +317,7 @@ class ProductControllerImplTest {
         Product product = objectMapper.readValue(response, Product.class);
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/products/"+product.getId().toString())
-                        .header("Authorization", "Bearer " + JWTAdmin))
+                        .header("Authorization", "Bearer " + jwtAdmin))
                 .andExpect(status().isNoContent());
 
         mockMvc.perform(get("/api/v1/products/"+product.getId().toString()))
@@ -309,5 +325,30 @@ class ProductControllerImplTest {
 
         assertEquals(0, productRepository.count());
         assertEquals(0, productImageRepository.count());
+    }
+
+    @Test
+    void deleteWhenUserIsNotAdminShouldReturnForbidden() throws Exception {
+        ProductDTO productDTO = new ProductDTO("product 1", "description 1", 100.0, 100, "category 1");
+        String productJson = objectMapper.writeValueAsString(productDTO);
+
+        MockMultipartFile productFile = new MockMultipartFile("product","","application/json", productJson.getBytes());
+
+        MockMultipartFile filePart = new MockMultipartFile("file", "product1.jpg", "image/jpeg", "image content".getBytes());
+
+        MvcResult mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart("http://localhost:8080/api/v1/products")
+                        .file(productFile)
+                        .file(filePart)
+                        .header("Authorization", "Bearer " + jwtAdmin)
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String response = mockMvcResult.getResponse().getContentAsString();
+        Product product = objectMapper.readValue(response, Product.class);
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/products/"+product.getId().toString())
+                        .header("Authorization", "Bearer " + jwtUser))
+                .andExpect(status().isForbidden());
     }
 }
