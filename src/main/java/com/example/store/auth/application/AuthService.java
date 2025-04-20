@@ -4,8 +4,8 @@ import com.example.store.auth.infrastructure.AuthRequest;
 import com.example.store.auth.infrastructure.RegisterRequest;
 import com.example.store.auth.infrastructure.TokenResponse;
 import com.example.store.user.domain.Role;
-import com.example.store.user.infrastructure.entity.UserEntity;
-import com.example.store.user.infrastructure.repository.QueryUserRepository;
+import com.example.store.user.domain.User;
+import com.example.store.user.domain.UserRepository;
 import com.example.store.config.application.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
@@ -21,22 +21,22 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final QueryUserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final UserRepository userRepository;
 
     public TokenResponse register(final RegisterRequest request) {
         if(userRepository.existsByEmail(request.email())) {
             throw new IllegalArgumentException("Usuario ya existe");
         }
-        final UserEntity user = UserEntity.builder()
+        final User user = User.builder()
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
                 .roles(Set.of(Role.USER))
                 .build();
 
-        final UserEntity savedUser = userRepository.save(user);
+        final User savedUser = userRepository.save(user);
         final String jwtToken = jwtService.generateToken(savedUser);
         final String refreshToken = jwtService.generateRefreshToken(savedUser);
 
@@ -44,7 +44,7 @@ public class AuthService {
     }
 
     public TokenResponse authenticate(final AuthRequest request) {
-        final UserEntity user = userRepository.findByEmail(request.email())
+        final User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no existe"));
         try{
             authenticationManager.authenticate(
@@ -70,7 +70,7 @@ public class AuthService {
         if(username == null) {
             throw new IllegalArgumentException("Invalid token");
         }
-        final UserEntity user = this.userRepository.findByEmail(username).orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+        final User user = this.userRepository.findByEmail(username).orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
         final boolean isTokenValid = jwtService.isTokenValid(refreshToken, user);
         if (!isTokenValid) {
             throw new IllegalArgumentException("Invalid token");
@@ -84,13 +84,13 @@ public class AuthService {
         if(userRepository.existsByEmail(request.email())) {
             throw new IllegalArgumentException("Usuario ya existe");
         }
-        final UserEntity user = UserEntity.builder()
+        final User user = User.builder()
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
                 .roles(Set.of(Role.USER, Role.ADMIN))
                 .build();
 
-        final UserEntity savedUser = userRepository.save(user);
+        final User savedUser = userRepository.save(user);
         final String jwtToken = jwtService.generateToken(savedUser);
         final String refreshToken = jwtService.generateRefreshToken(savedUser);
 

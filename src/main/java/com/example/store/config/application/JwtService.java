@@ -1,6 +1,6 @@
 package com.example.store.config.application;
 
-import com.example.store.user.infrastructure.entity.UserEntity;
+import com.example.store.user.domain.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -30,15 +30,15 @@ public class JwtService {
                 .getSubject();
     }
 
-    public String generateToken(final UserEntity user) {
+    public String generateToken(final User user) {
         return buildToken(user, jwtExpiration);
     }
 
-    public String generateRefreshToken(final UserEntity user) {
+    public String generateRefreshToken(final User user) {
         return buildToken(user, refreshExpiration);
     }
 
-    private String buildToken(final UserEntity user, final long expiration) {
+    private String buildToken(final User user, final long expiration) {
         return Jwts
                 .builder()
                 .subject(user.getId().toString())
@@ -48,7 +48,7 @@ public class JwtService {
                 .compact();
     }
 
-    public boolean isTokenValid(String token, UserEntity user) {
+    public boolean isTokenValid(String token, User user) {
         final String id = extractSubject(token);
         return (id.equals(user.getId().toString())) && !isTokenExpired(token);
     }

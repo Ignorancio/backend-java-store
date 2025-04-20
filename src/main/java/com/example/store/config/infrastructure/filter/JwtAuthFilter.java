@@ -1,6 +1,8 @@
 package com.example.store.config.infrastructure.filter;
 
+import com.example.store.user.domain.User;
 import com.example.store.user.infrastructure.entity.UserEntity;
+import com.example.store.user.infrastructure.mapper.UserMapper;
 import com.example.store.user.infrastructure.repository.QueryUserRepository;
 import com.example.store.config.application.JwtService;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -30,6 +32,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final QueryUserRepository userRepository;
+    private final UserMapper userMapper;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
@@ -51,7 +54,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             }
             final UserEntity user = userRepository.findById(UUID.fromString(id)).orElseThrow(()-> new IllegalArgumentException("Usuario no encontrado"));
 
-            final boolean isTokenValid = jwtService.isTokenValid(jwt, user);
+            final User user1 = userMapper.userEntityToUser(user);
+
+            final boolean isTokenValid = jwtService.isTokenValid(jwt, user1);
 
             if (isTokenValid) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
