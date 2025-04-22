@@ -35,8 +35,8 @@ public class OrderControllerImpl implements OrderController{
     public ResponseEntity<Order> save(@RequestBody @Valid OrderDTO orderDTO) {
         Order order = orderMapper.OrderDTOToOrder(orderDTO);
         Object auth = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if(auth instanceof UserEntity){
-            order.setUser(userMapper.userEntityToUser((UserEntity) auth));
+        if(auth instanceof UserEntity userEntity){
+            order.setUser(userMapper.userEntityToUser(userEntity));
             return ResponseEntity.status(HttpStatus.CREATED).body(orderService.save(order));
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
