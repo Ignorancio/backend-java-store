@@ -56,15 +56,7 @@ public class ProductServiceImpl implements ProductService{
     }
 
     public Product findById(Long id) {
-        Optional<Product> optionalProduct = cacheProductRepository.findById(id);
-
-        if(optionalProduct.isPresent()){
-            return optionalProduct.get();
-        }
-
-        Product product = queryProductRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
-        cacheProductRepository.save(product);
-        return product;
+        return queryProductRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
     }
 
     public Product update(Product product, Optional<MultipartFile> file) {

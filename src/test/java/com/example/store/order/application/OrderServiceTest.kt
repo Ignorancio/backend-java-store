@@ -14,6 +14,7 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.junit.jupiter.MockitoExtension
+import java.util.*
 import kotlin.test.assertEquals
 
 @ExtendWith(MockitoExtension::class)
@@ -23,8 +24,6 @@ class OrderServiceTest {
     private lateinit var orderRepository: OrderRepository
     @Mock
     private lateinit var productRepository: ProductRepository
-    @Mock
-    private lateinit var orderDetailsRepository: OrderRepository
 
     @InjectMocks
     private lateinit var orderService: OrderServiceImpl
@@ -74,6 +73,21 @@ class OrderServiceTest {
             orderService.save(order)
         }
         assertEquals("Stock insuficiente", exception.message)
+
+    }
+
+    @Test
+    fun findByIdWhenOrderIdNoExistShouldReturnThrowIllegalArgumentException() {
+
+        //These are the data that should come from the controller
+        val orderId = 1L
+
+        Mockito.`when`(orderRepository.findById(1L)).thenReturn(Optional.empty())
+
+        val exception = assertThrows<IllegalArgumentException> {
+            orderService.findById(orderId)
+        }
+        assertEquals("Order no encontrado", exception.message)
 
     }
 }
