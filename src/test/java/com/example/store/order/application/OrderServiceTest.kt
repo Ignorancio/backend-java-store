@@ -54,4 +54,26 @@ class OrderServiceTest {
         assertEquals("Product no encontrado", exception.message)
 
     }
+
+    @Test
+    fun saveOrderWhenProductStockIsLessThanQuantityShouldReturnThrowIllegalArgumentException() {
+
+        //These are the data that should come from the controller
+        val order = Order.builder()
+            .orderDetails(listOf(
+                OrderDetails.builder().product(Product.builder().id(1).build()).quantity(10).build(),
+                OrderDetails.builder().product(Product.builder().id(2).build()).quantity(15).build()))
+            .build()
+
+        Mockito.`when`(productRepository.findAllById(listOf(1L,2L))).thenReturn(listOf(
+            Product(1, "Product 1", "Description 1", 10.0, 5, Category(1, "Category 1"), null),
+            Product(2, "Product 2", "Description 2", 20.0, 15, Category(2, "Category 2"), null)
+        ))
+
+        val exception = assertThrows<IllegalStateException> {
+            orderService.save(order)
+        }
+        assertEquals("Stock insuficiente", exception.message)
+
+    }
 }
