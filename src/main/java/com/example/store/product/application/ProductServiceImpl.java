@@ -46,7 +46,6 @@ public class ProductServiceImpl implements ProductService{
         ProductImage productImage = ProductImage.builder().url("api/v1/products/images/"+fileName).build();
         product.setProductImage(productImage);
         Product saved = queryProductRepository.save(product);
-        cacheProductRepository.save(saved);
         searchProductRepository.save(saved);
         return saved;
     }
@@ -77,15 +76,12 @@ public class ProductServiceImpl implements ProductService{
             productdb.getProductImage().setUrl("api/v1/products/images/"+fileName);
             productImageRepository.save(productdb.getProductImage());
         }
-        Product saved = queryProductRepository.save(productdb);
-        cacheProductRepository.save(saved);
-        return saved;
+        return queryProductRepository.save(productdb);
     }
 
     public void deleteById(Long id) {
         queryProductRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
         queryProductRepository.deleteById(id);
-        cacheProductRepository.deleteById(id);
     }
 
     private Category findOrSaveCategory(Category category) {

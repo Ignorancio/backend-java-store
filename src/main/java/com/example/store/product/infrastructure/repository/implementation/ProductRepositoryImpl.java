@@ -4,6 +4,7 @@ import com.example.store.product.domain.Product;
 import com.example.store.product.domain.ProductRepository;
 import com.example.store.product.infrastructure.entity.ProductEntity;
 import com.example.store.product.infrastructure.mapper.ProductMapper;
+import com.example.store.product.infrastructure.repository.CacheProductRepository;
 import com.example.store.product.infrastructure.repository.QueryProductRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -13,22 +14,32 @@ import java.util.Optional;
 
 @Repository("postgresProductRepository")
 @AllArgsConstructor
-public class PostgresProductRepository implements ProductRepository {
+public class ProductRepositoryImpl implements ProductRepository {
 
     QueryProductRepository queryProductRepository;
+    CacheProductRepository cacheProductRepository;
     ProductMapper productMapper;
 
     public Product save(Product product) {
         ProductEntity saved = queryProductRepository.save(productMapper.productToProductEntity(product));
-        return productMapper.productEntityToProduct(saved);
+        Product productSaved = productMapper.productEntityToProduct(saved);
+        cacheProductRepository.save(productMapper.productToProductCacheEntity(productSaved));
+        return productSaved;
     }
 
     public Optional<Product> findById(Long id) {
-        return queryProductRepository.findById(id).map(productMapper::productEntityToProduct);
+        Optional<Product> product = cacheProductRepository.findById(id).map(productMapper::productCacheEntityToProduct);
+        if(product.isEmpty()){
+            product = queryProductRepository.findById(id).map(productMapper::productEntityToProduct);
+            product.ifPresent(productSaved ->
+                    cacheProductRepository.save(productMapper.productToProductCacheEntity(productSaved)));
+        }
+        return product;
     }
 
     public void deleteById(Long id) {
         queryProductRepository.deleteById(id);
+        cacheProductRepository.deleteById(id);
     }
 
     public List<Product> findAll() {
