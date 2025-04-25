@@ -90,4 +90,24 @@ class OrderServiceTest {
         assertEquals("Order no encontrado", exception.message)
 
     }
+
+    @Test
+    fun findByIdWhenOrderIdExistShouldReturnOrder() {
+
+        //These are the data that should come from the controller
+        val orderId = 1L
+
+        Mockito.`when`(orderRepository.findById(1L)).thenReturn(Optional.of(
+            Order.builder()
+                .id(1)
+                .orderDetails(listOf(
+                    OrderDetails.builder().product(Product.builder().id(1).build()).quantity(10).build(),
+                    OrderDetails.builder().product(Product.builder().id(2).build()).quantity(15).build()))
+                .build()
+        ))
+
+        val order = orderService.findById(orderId)
+
+        assertEquals(orderId, order.id)
+    }
 }
