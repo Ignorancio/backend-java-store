@@ -17,7 +17,6 @@ public class ProductServiceImpl implements ProductService{
 
     private final ProductRepository queryProductRepository;
     private final ProductImageRepository productImageRepository;
-    private final ProductRepository cacheProductRepository;
     private final CategoryRepository categoryRepository;
     private final SearchProductRepository searchProductRepository;
     private final FileUpload fileUpload;
@@ -25,21 +24,18 @@ public class ProductServiceImpl implements ProductService{
 
     public ProductServiceImpl(@Qualifier("postgresProductRepository") ProductRepository queryProductRepository,
                               ProductImageRepository productImageRepository,
-                              @Qualifier("redisProductRepository") ProductRepository cacheProductRepository,
                               CategoryRepository categoryRepository,
                               SearchProductRepository searchProductRepository,
                               FileUpload fileUpload,
                               ProductUtils productUtils) {
         this.queryProductRepository = queryProductRepository;
         this.productImageRepository = productImageRepository;
-        this.cacheProductRepository = cacheProductRepository;
         this.categoryRepository = categoryRepository;
         this.searchProductRepository = searchProductRepository;
         this.fileUpload = fileUpload;
         this.productUtils = productUtils;
     }
 
-    //TODO implement event driven architecture for product commands
     public Product save(Product product, MultipartFile file) {
         product.setCategory(findOrSaveCategory(product.getCategory()));
         String fileName = fileUpload.uploadFile("/images", file);
@@ -51,8 +47,7 @@ public class ProductServiceImpl implements ProductService{
     }
 
     public List<Product> findAll() {
-        //TODO implement persistence strategy
-        return cacheProductRepository.findAll();
+        return queryProductRepository.findAll();
     }
 
     public Product findById(Long id) {

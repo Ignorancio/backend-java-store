@@ -29,9 +29,6 @@ public class ProductServiceTest {
     private ProductRepository queryProductRepository;
 
     @Mock
-    private ProductRepository cacheProductRepository;
-
-    @Mock
     private CategoryRepository categoryRepository;
 
     @Mock
@@ -48,7 +45,6 @@ public class ProductServiceTest {
         productService = new ProductServiceImpl(
                 queryProductRepository,
                 null,
-                cacheProductRepository,
                 categoryRepository,
                 searchProductRepository,
                 fileUpload,
@@ -108,7 +104,7 @@ public class ProductServiceTest {
                 .productImage(ProductImage.builder().id(1L).url("api/v1/products/images/test.jpg").build())
                 .build();
 
-        Mockito.when(cacheProductRepository.findAll()).thenReturn(List.of(PRODUCT_SAVED_PREPARED));
+        Mockito.when(queryProductRepository.findAll()).thenReturn(List.of(PRODUCT_SAVED_PREPARED));
 
         List<Product> products = productService.findAll();
         assertEquals(1, products.size());
