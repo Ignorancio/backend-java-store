@@ -5,7 +5,6 @@ import com.example.store.category.domain.CategoryRepository;
 import com.example.store.product.domain.*;
 import com.example.store.search.infrastructure.repository.implementation.SearchProductRepository;
 import com.example.store.util.FileUpload;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,7 +21,7 @@ public class ProductServiceImpl implements ProductService{
     private final FileUpload fileUpload;
     private final ProductUtils productUtils;
 
-    public ProductServiceImpl(@Qualifier("postgresProductRepository") ProductRepository queryProductRepository,
+    public ProductServiceImpl(ProductRepository queryProductRepository,
                               ProductImageRepository productImageRepository,
                               CategoryRepository categoryRepository,
                               SearchProductRepository searchProductRepository,

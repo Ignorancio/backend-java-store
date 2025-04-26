@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-@Repository("postgresProductRepository")
+@Repository
 @AllArgsConstructor
 public class ProductRepositoryImpl implements ProductRepository {
 

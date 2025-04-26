@@ -3,7 +3,6 @@ package com.example.store.order.application;
 import com.example.store.order.domain.*;
 import com.example.store.product.domain.Product;
 import com.example.store.product.domain.ProductRepository;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +19,7 @@ public class OrderServiceImpl implements OrderService {
 
     public OrderServiceImpl(OrderRepository orderRepository,
                             OrderDetailsRepository orderDetailsRepository,
-                            @Qualifier("postgresProductRepository") ProductRepository productRepository) {
+                            ProductRepository productRepository) {
         this.orderRepository = orderRepository;
         this.orderDetailsRepository = orderDetailsRepository;
         this.productRepository = productRepository;
