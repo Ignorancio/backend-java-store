@@ -144,7 +144,7 @@ class ProductControllerImplTest {
     }
 
     @Test
-    void findById() throws Exception {
+    void findByProductId() throws Exception {
 
         ProductDTO productDTO = new ProductDTO("product 1", "description 1", 100.0, 100, "category 1");
         String productJson = objectMapper.writeValueAsString(productDTO);
@@ -175,7 +175,7 @@ class ProductControllerImplTest {
     }
 
     @Test
-    void findAll() throws Exception {
+    void findAllProductsShouldReturnAllProducts() throws Exception {
         MvcResult mockMvcResult = mockMvc.perform(get("/api/v1/products"))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -183,7 +183,7 @@ class ProductControllerImplTest {
     }
 
     @Test
-    void updateWithoutImage () throws Exception {
+    void updateProductWithoutImageWhenUserIsAdminShouldReturnProductUpdate () throws Exception {
 
         ProductDTO productDTO = new ProductDTO("product 1", "description 1", 100.0, 100, "category 1");
         String productJson = objectMapper.writeValueAsString(productDTO);
@@ -238,7 +238,7 @@ class ProductControllerImplTest {
     }
 
     @Test
-    void updateWithImage () throws Exception {
+    void updateProductWithImageWhenUserIsAdminShouldReturnProductUpdate () throws Exception {
 
         ProductDTO productDTO = new ProductDTO("product 1", "description 1", 100.0, 100, "category 1");
         String productJson = objectMapper.writeValueAsString(productDTO);
@@ -296,7 +296,7 @@ class ProductControllerImplTest {
     }
 
     @Test
-    void delete() throws Exception {
+    void deleteProductByIdWhenUserIsAdminShouldReturnNoContent() throws Exception {
 
         ProductDTO productDTO = new ProductDTO("product 1", "description 1", 100.0, 100, "category 1");
         String productJson = objectMapper.writeValueAsString(productDTO);
@@ -328,7 +328,7 @@ class ProductControllerImplTest {
     }
 
     @Test
-    void deleteWhenUserIsNotAdminShouldReturnForbidden() throws Exception {
+    void deleteProductByIdWhenUserIsNotAdminShouldReturnForbidden() throws Exception {
         ProductDTO productDTO = new ProductDTO("product 1", "description 1", 100.0, 100, "category 1");
         String productJson = objectMapper.writeValueAsString(productDTO);
 
@@ -350,5 +350,8 @@ class ProductControllerImplTest {
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/products/"+product.getId().toString())
                         .header("Authorization", "Bearer " + jwtUser))
                 .andExpect(status().isForbidden());
+
+        assertEquals(1, productRepository.count());
+        assertEquals(1, productImageRepository.count());
     }
 }
