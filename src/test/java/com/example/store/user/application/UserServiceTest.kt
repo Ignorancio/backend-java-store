@@ -50,4 +50,13 @@ class UserServiceTest {
 
         assertEquals(userId, user.id)
     }
+
+    @Test
+    fun findAllShouldReturnListOfUsers() {
+        Mockito.`when`(userRepository.findAll()).thenReturn(listOf())
+
+        val users = userService.findAll()
+
+        assertEquals(0, users.size)
+    }
 }
