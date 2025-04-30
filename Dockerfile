@@ -1,7 +1,11 @@
-FROM maven:3.9.9-amazoncorretto-17-al2023
+FROM maven:3.9.9-amazoncorretto-17-al2023 AS builder
 
 WORKDIR /app
 COPY . .
-RUN mvn package -DskipTests
+RUN mvn clean package -DskipTests
 
-CMD ["mvn", "spring-boot:run"]
+FROM amazoncorretto:17-al2023
+
+WORKDIR /app
+COPY --from=builder /app/target/*.jar app.jar
+CMD ["java", "-jar", "app.jar"]
