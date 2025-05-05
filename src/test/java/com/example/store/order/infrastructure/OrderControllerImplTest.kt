@@ -479,4 +479,48 @@ class OrderControllerImplTest(
         assertEquals(0, orderRepository.count())
         assertEquals(0, orderDetailsRepository.count())
     }
+
+    @Test
+    fun addProductToOrderWhenUserIsCreatorShouldAddProductToOrder() {
+        val orderDetailsDTO = listOf(
+            OrderDetailsDTO(product1.id, 10),
+            OrderDetailsDTO(product2.id, 15),
+        )
+
+        val orderDTO = OrderDTO(orderDetailsDTO)
+
+        val orderJson = objectMapper.writeValueAsString(orderDTO)
+
+        val mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/orders")
+                    .contentType("application/json")
+                    .content(orderJson)
+                    .header("Authorization", "Bearer $jwtUser"))
+            .andExpect(status().isCreated)
+            .andReturn()
+
+        val response = mockMvcResult.response.contentAsString
+        val order = objectMapper.readValue(response, Order::class.java)
+
+        val addProductDTO = OrderDTO(listOf( OrderDetailsDTO(product3.id, 5)))
+        val addProductJson = objectMapper.writeValueAsString(addProductDTO)
+
+        val updatedMvcResult = mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/orders/${order.id}")
+                    .contentType("application/json")
+                    .content(addProductJson)
+                    .header("Authorization", "Bearer $jwtUser"))
+            .andExpect(status().isOk)
+            .andReturn()
+
+        val updatedResponse = updatedMvcResult.response.contentAsString
+        val updatedOrder = objectMapper.readValue(updatedResponse, Order::class.java)
+
+        assertEquals(order.id, updatedOrder.id)
+        assertEquals(3, orderDetailsRepository.count())
+        assertEquals(3, updatedOrder.orderDetails.size)
+
+        val listorder = orderRepository.findById(order.id).get()
+        listorder.orderDetails.forEach{
+            assertEquals(it.order.id, updatedOrder.id)
+        }
+    }
 }
