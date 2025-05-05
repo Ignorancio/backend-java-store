@@ -14,14 +14,11 @@ import java.util.UUID;
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
-    private final OrderDetailsRepository orderDetailsRepository;
     private final ProductRepository productRepository;
 
     public OrderServiceImpl(OrderRepository orderRepository,
-                            OrderDetailsRepository orderDetailsRepository,
                             ProductRepository productRepository) {
         this.orderRepository = orderRepository;
-        this.orderDetailsRepository = orderDetailsRepository;
         this.productRepository = productRepository;
     }
 
@@ -89,8 +86,10 @@ public class OrderServiceImpl implements OrderService {
                 orderDetails.setProduct(product);
                 orderDetails.setPrice(product.getPrice());
                 order.setTotal(order.getTotal() + orderDetails.getQuantity()*product.getPrice());
-                orderDetailsRepository.save(orderDetails);
+                order.getOrderDetails().add(orderDetails);
+//                orderDetailsRepository.save(orderDetails);
             });
+        System.out.println(order);
         return orderRepository.save(order);
     }
 }
