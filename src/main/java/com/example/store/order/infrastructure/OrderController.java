@@ -2,7 +2,6 @@ package com.example.store.order.infrastructure;
 
 import com.example.store.order.domain.Order;
 import com.example.store.order.infrastructure.dto.OrderDTO;
-import com.example.store.order.infrastructure.dto.OrderDetailsDTO;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -19,5 +18,5 @@ public interface OrderController {
 
     ResponseEntity<Void> delete(Long id);
 
-    ResponseEntity<Order> update(Long id, List<OrderDetailsDTO> orderDTO);
+    ResponseEntity<Order> update(Long id, OrderDTO orderDTO);
 }

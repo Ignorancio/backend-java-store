@@ -3,7 +3,6 @@ package com.example.store.order.infrastructure;
 import com.example.store.order.application.OrderServiceImpl;
 import com.example.store.order.domain.Order;
 import com.example.store.order.infrastructure.dto.OrderDTO;
-import com.example.store.order.infrastructure.dto.OrderDetailsDTO;
 import com.example.store.order.infrastructure.mapper.OrderMapper;
 import com.example.store.user.domain.Role;
 import com.example.store.user.infrastructure.entity.UserEntity;
@@ -90,7 +89,7 @@ public class OrderControllerImpl implements OrderController{
 
     @PutMapping("/{id}")
     @Operation(summary = "Update an order by id, but you must be the owner or an administrator")
-    public ResponseEntity<Order> update(@PathVariable Long id, @RequestBody @Valid List<OrderDetailsDTO> orderDTO) {
-        return ResponseEntity.status(HttpStatus.OK).body(orderService.addOrderDetails(id, orderDTO.stream().map(orderMapper::orderdetailsDTOToOrderDetails).toList()));
+    public ResponseEntity<Order> update(@PathVariable Long id, @RequestBody @Valid OrderDTO orderDTO) {
+        return ResponseEntity.status(HttpStatus.OK).body(orderService.addOrderDetails(id, orderDTO.orderDetails().stream().map(orderMapper::orderdetailsDTOToOrderDetails).toList()));
     }
 }
