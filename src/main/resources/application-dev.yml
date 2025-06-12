@@ -20,13 +20,6 @@ spring:
       host: ${CACHE_URL}
       port: ${CACHE_PORT}
       timeout: 6000
-    elasticsearch:
-      repositories:
-        enabled: true
-  elasticsearch:
-    uris: ${ELASTIC_URL}
-    username: ${ELASTIC_USER}
-    password: ${ELASTIC_PASSWORD}
 application:
   security:
     jwt:
