@@ -5,7 +5,6 @@ import com.example.store.category.domain.CategoryRepository;
 import com.example.store.product.domain.Product;
 import com.example.store.product.domain.ProductImage;
 import com.example.store.product.domain.ProductRepository;
-import com.example.store.search.infrastructure.repository.implementation.SearchProductRepository;
 import com.example.store.util.FileUpload;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,9 +33,6 @@ public class ProductServiceTest {
     @Mock
     private FileUpload fileUpload;
 
-    @Mock
-    private SearchProductRepository searchProductRepository;
-
     @InjectMocks
     private ProductServiceImpl productService;
 
@@ -46,7 +42,6 @@ public class ProductServiceTest {
                 queryProductRepository,
                 null,
                 categoryRepository,
-                searchProductRepository,
                 fileUpload,
                 null
         );
