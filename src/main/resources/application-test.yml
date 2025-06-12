@@ -18,13 +18,6 @@ spring:
       host: localhost
       port: 6379
       timeout: 6000
-    elasticsearch:
-      repositories:
-        enabled: true
-  elasticsearch:
-    uris: http://localhost:9200
-    username: elastic
-    password: changeme
 application:
   security:
     jwt:

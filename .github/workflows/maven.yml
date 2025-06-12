@@ -42,24 +42,6 @@ jobs:
           --health-interval 10s
           --health-timeout 10s
           --health-retries 5
-      elasticsearch:
-        image: elasticsearch:8.17.3
-        env:
-          cluster.name: test_cluster
-          discovery.type: single-node
-          ELASTIC_USERNAME: elastic
-          ELASTIC_PASSWORD: changeme
-          xpack.security.enabled: "true"
-          xpack.security.http.ssl.enabled: "false"
-        ports:
-          - 9200:9200
-          - 9300:9300
-        options: >-
-          --health-cmd "curl -u elastic:changeme -X GET http://localhost:9200/_cluster/health?pretty"
-          --health-interval 15s
-          --health-timeout 15s
-          --health-retries 20
-
     env:
       SPRING_PROFILES_ACTIVE: test
     
