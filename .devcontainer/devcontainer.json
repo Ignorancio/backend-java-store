@@ -1,0 +1,8 @@
+{
+  "name": "Java Dev",
+
+  "dockerComposeFile": ["../docker-compose.dev.yml"],
+  "service": "java-dev",
+  "workspaceFolder": "/app",
+  "postCreateCommand": ["mvn", "clean", "install", "-DskipTests"]
+}
