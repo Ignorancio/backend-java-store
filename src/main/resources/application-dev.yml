@@ -32,3 +32,12 @@ springdoc:
     operationsSorter: method
     tagsSorter: alpha
     path: /
+#Tracing
+management:
+  tracing:
+    sampling:
+      probability: 1
+    enabled: true
+  otlp:
+    tracing:
+      endpoint: http://tempo:4318/v1/traces

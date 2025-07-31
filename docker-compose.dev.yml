@@ -12,6 +12,8 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - CACHE_URL=${CACHE_URL}
       - CACHE_PORT=${CACHE_PORT}
+    ports:
+        - "8080:8080"
     depends_on:
       database:
         condition: service_healthy
@@ -39,3 +41,22 @@ services:
       interval: 10s
       timeout: 10s
       retries: 5
+  tempo:
+    image: grafana/tempo:latest
+    ports:
+      - "4318:4318"     # OTLP HTTP (usa este en Spring Boot)
+      - "3200:3200"     # Tempo query port (lo usa Grafana)
+    command: [ "-config.file=/etc/tempo.yml" ]
+    volumes:
+      - ./docker-config/tempo/tempo.yml:/etc/tempo.yml
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-storage:/var/lib/grafana
+volumes:
+  grafana-storage:
