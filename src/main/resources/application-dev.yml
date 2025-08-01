@@ -41,3 +41,20 @@ management:
   otlp:
     tracing:
       endpoint: http://tempo:4318/v1/traces
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+#Logging
+logging:
+  file:
+    name: logs/app.log
+#  pattern:
+#    level: ""%5p [%X{traceId},%X{spanId}]"
+  level:
+    root: INFO
+    com.example.store: INFO
