@@ -20,7 +20,7 @@ public class FileUploadUtil implements FileUpload{
     @NonNull
     public String uploadFile(@NonNull String directory,@NonNull MultipartFile file) {
 
-        Path uploadPath = Paths.get("src/main/resources" + directory);
+        Path uploadPath = Paths.get("public" + directory);
 
         if (!Files.exists(uploadPath)) {
             try {
