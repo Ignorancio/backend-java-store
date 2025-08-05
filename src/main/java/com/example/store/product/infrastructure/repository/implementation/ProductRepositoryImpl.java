@@ -6,19 +6,19 @@ import com.example.store.product.infrastructure.entity.ProductEntity;
 import com.example.store.product.infrastructure.mapper.ProductMapper;
 import com.example.store.product.infrastructure.repository.CacheProductRepository;
 import com.example.store.product.infrastructure.repository.QueryProductRepository;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ProductRepositoryImpl implements ProductRepository {
 
-    QueryProductRepository queryProductRepository;
-    CacheProductRepository cacheProductRepository;
-    ProductMapper productMapper;
+    private final QueryProductRepository queryProductRepository;
+    private final CacheProductRepository cacheProductRepository;
+    private final ProductMapper productMapper;
 
     public Product save(Product product) {
         ProductEntity saved = queryProductRepository.save(productMapper.productToProductEntity(product));
@@ -49,4 +49,5 @@ public class ProductRepositoryImpl implements ProductRepository {
     public List<Product> findAllById(List<Long> ids) {
         return queryProductRepository.findAllById(ids).stream().map(productMapper::productEntityToProduct).toList();
     }
+
 }

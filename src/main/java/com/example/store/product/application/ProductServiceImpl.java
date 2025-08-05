@@ -4,6 +4,7 @@ import com.example.store.category.domain.Category;
 import com.example.store.category.domain.CategoryRepository;
 import com.example.store.product.domain.*;
 import com.example.store.util.FileUpload;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService{
 
     private final ProductRepository queryProductRepository;
@@ -18,18 +20,6 @@ public class ProductServiceImpl implements ProductService{
     private final CategoryRepository categoryRepository;
     private final FileUpload fileUpload;
     private final ProductUtils productUtils;
-
-    public ProductServiceImpl(ProductRepository queryProductRepository,
-                              ProductImageRepository productImageRepository,
-                              CategoryRepository categoryRepository,
-                              FileUpload fileUpload,
-                              ProductUtils productUtils) {
-        this.queryProductRepository = queryProductRepository;
-        this.productImageRepository = productImageRepository;
-        this.categoryRepository = categoryRepository;
-        this.fileUpload = fileUpload;
-        this.productUtils = productUtils;
-    }
 
     public Product save(Product product, MultipartFile file) {
         product.setCategory(findOrSaveCategory(product.getCategory()));
