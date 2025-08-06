@@ -16,4 +16,8 @@ public class ProductServiceImplV2 {
     public Page<Product> findAll(Pageable pageable) {
         return productRepositoryImplV2.findAll(pageable);
     }
+
+    public Page<Product> findByNameContaining(String name, Pageable pageable) {
+        return productRepositoryImplV2.findAllByProductNameContaining(name, pageable);
+    }
 }

@@ -19,4 +19,9 @@ public class ProductRepositoryImplV2 {
     public Page<Product> findAll(Pageable pageable) {
         return queryProductRepository.findAll(pageable).map(productMapper::productEntityToProduct);
     }
+
+    public Page<Product> findAllByProductNameContaining(String productName, Pageable pageable) {
+        return queryProductRepository.findAllByNameContainingIgnoreCase(productName, pageable)
+                .map(productMapper::productEntityToProduct);
+    }
 }
