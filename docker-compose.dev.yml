@@ -12,6 +12,7 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - CACHE_URL=${CACHE_URL}
       - CACHE_PORT=${CACHE_PORT}
+      - TEMPO_URL=${TEMPO_URL}
     ports:
         - "8080:8080"
     depends_on:

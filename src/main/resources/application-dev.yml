@@ -32,7 +32,6 @@ springdoc:
     operationsSorter: method
     tagsSorter: alpha
     path: /
-#Tracing
 management:
   tracing:
     sampling:
@@ -40,7 +39,7 @@ management:
     enabled: true
   otlp:
     tracing:
-      endpoint: http://tempo:4318/v1/traces
+      endpoint: ${TEMPO_URL}
   endpoints:
     web:
       exposure:
@@ -49,12 +48,9 @@ management:
     metrics:
       export:
         enabled: true
-#Logging
 logging:
   file:
     name: logs/app.log
-#  pattern:
-#    level: ""%5p [%X{traceId},%X{spanId}]"
   level:
     root: INFO
     com.example.store: INFO
