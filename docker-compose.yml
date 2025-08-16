@@ -15,6 +15,7 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       CACHE_URL: ${CACHE_URL}
       CACHE_PORT: ${CACHE_PORT}
+      TEMPO_URL: ${TEMPO_URL}
     depends_on:
       database:
         condition: service_healthy
@@ -35,9 +36,9 @@ services:
       timeout: 5s
       retries: 5
     networks:
-        - spring-network
+      - spring-network
     volumes:
-        - database-volume:/var/lib/postgresql/data
+      - database-volume:/var/lib/postgresql/data
   redis:
     image: redis:8.0-M04-alpine3.21
     restart: unless-stopped
@@ -52,4 +53,4 @@ networks:
   spring-network:
     driver: bridge
 volumes:
-    database-volume:
+  database-volume:
