@@ -23,6 +23,8 @@ services:
         condition: service_healthy
     networks:
       - spring-network
+    volumes:
+      - ./public:/app/public
   database:
     image: postgres:17.4
     restart: unless-stopped
