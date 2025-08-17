@@ -24,7 +24,7 @@ public class ProductServiceImpl implements ProductService {
     public Product save(Product product, MultipartFile file) {
         product.setCategory(findOrSaveCategory(product.getCategory()));
         String fileName = fileUpload.uploadFile("/images", file);
-        ProductImage productImage = ProductImage.builder().url("api/v1/products/images/" + fileName).build();
+        ProductImage productImage = ProductImage.builder().url("api/v2/products/images/" + fileName).build();
         product.setProductImage(productImage);
         return queryProductRepository.save(product);
     }
