@@ -9,8 +9,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 @RestController
 @RequestMapping("/api/v2/products")
@@ -33,7 +38,12 @@ public class ProductControllerImplV2 {
 
     @GetMapping("/images/{fileName:.+}")
     @Operation(summary = "Return a product image by file name")
-    public ResponseEntity<Resource> getImage(@PathVariable String fileName) {
-        return ResponseEntity.status(HttpStatus.OK).body(productService.findImageByName(fileName));
+    public ResponseEntity<Resource> getImage(@PathVariable String fileName) throws IOException {
+        Resource image = productService.findImageByName(fileName);
+        String contentType = Files.probeContentType(Paths.get(image.getFile().getAbsolutePath()));
+        if (contentType == null) {
+            contentType = "application/octet-stream"; // fallback si no se detecta
+        }
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.parseMediaType(contentType)).body(image);
     }
 }
