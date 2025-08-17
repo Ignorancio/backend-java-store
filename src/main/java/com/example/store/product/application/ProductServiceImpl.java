@@ -13,7 +13,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class ProductServiceImpl implements ProductService{
+public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository queryProductRepository;
     private final ProductImageRepository productImageRepository;
@@ -24,7 +24,7 @@ public class ProductServiceImpl implements ProductService{
     public Product save(Product product, MultipartFile file) {
         product.setCategory(findOrSaveCategory(product.getCategory()));
         String fileName = fileUpload.uploadFile("/images", file);
-        ProductImage productImage = ProductImage.builder().url("api/v1/products/images/"+fileName).build();
+        ProductImage productImage = ProductImage.builder().url("api/v1/products/images/" + fileName).build();
         product.setProductImage(productImage);
         return queryProductRepository.save(product);
     }
@@ -41,9 +41,9 @@ public class ProductServiceImpl implements ProductService{
         Product productdb = queryProductRepository.findById(product.getId()).orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
         productUtils.copyNonNullProperties(product, productdb);
         productdb.setCategory(findOrSaveCategory(productdb.getCategory()));
-        if(file.isPresent() && file.get().getOriginalFilename() != null) {
+        if (file.isPresent() && file.get().getOriginalFilename() != null) {
             String fileName = fileUpload.uploadFile("/images", file.get());
-            productdb.getProductImage().setUrl("api/v1/products/images/"+fileName);
+            productdb.getProductImage().setUrl("api/v2/products/images/" + fileName);
             productImageRepository.save(productdb.getProductImage());
         }
         return queryProductRepository.save(productdb);
