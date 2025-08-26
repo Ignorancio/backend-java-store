@@ -42,41 +42,5 @@ services:
       interval: 10s
       timeout: 10s
       retries: 5
-  tempo:
-    image: grafana/tempo:latest
-    ports:
-      - "4318:4318"     # OTLP HTTP (usa este en Spring Boot)
-      - "3200:3200"     # Tempo query port (lo usa Grafana)
-    command: [ "-config.file=/etc/tempo.yml" ]
-    volumes:
-      - ./docker-config/tempo/tempo.yml:/etc/tempo.yml
-  grafana:
-    image: grafana/grafana:latest
-    ports:
-      - "3000:3000"
-    environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-    volumes:
-      - grafana-storage:/var/lib/grafana
-  promtail:
-    image: grafana/promtail:latest
-    volumes:
-      - ./logs:/var/log/app
-      - ./docker-config/promtail/promtail-config.yml:/etc/promtail/config.yml
-    command: -config.file=/etc/promtail/config.yml
-    depends_on:
-      - loki
-  loki:
-    image: grafana/loki:latest
-    ports:
-      - "3100:3100"
-    command: -config.file=/etc/loki/local-config.yaml
-  prometheus:
-    image: prom/prometheus
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./docker-config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
 volumes:
   grafana-storage:
