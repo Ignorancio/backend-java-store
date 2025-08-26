@@ -25,6 +25,7 @@ services:
       - spring-network
     volumes:
       - ./public:/app/public
+      - ./logs:/app/logs
   database:
     image: postgres:17.4
     restart: unless-stopped
@@ -51,8 +52,60 @@ services:
       retries: 5
     networks:
       spring-network:
+  tempo:
+    image: grafana/tempo:latest
+    restart: unless-stopped
+    command: -config.file=/etc/tempo.yml
+    volumes:
+      - ./docker-config/tempo/tempo.yml:/etc/tempo.yml
+      - tempo-data:/var/tempo
+    networks:
+      - spring-network
+  grafana:
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    networks:
+      - spring-network
+  promtail:
+    image: grafana/promtail:latest
+    restart: unless-stopped
+    volumes:
+      - ./logs:/var/log/app
+      - ./docker-config/promtail/promtail-config.yml:/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+    networks:
+      - spring-network
+  loki:
+    image: grafana/loki:latest
+    restart: unless-stopped
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - loki-data:/loki
+    networks:
+      - spring-network
+  prometheus:
+    image: prom/prometheus
+    restart: unless-stopped
+    volumes:
+      - ./docker-config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    networks:
+      - spring-network
 networks:
   spring-network:
     driver: bridge
 volumes:
   database-volume:
+  grafana-storage:
+  tempo-data:
+  loki-data:
+  prometheus-data:
