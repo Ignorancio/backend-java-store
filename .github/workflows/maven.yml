@@ -66,7 +66,7 @@ jobs:
         run: echo "REPO_OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
 
       - name: Build Docker image
-        run: docker build -f .github/Dockerfile -t ghcr.io/${REPO_OWNER_LC}/spring-backend:latest .
+        run: docker build -f Dockerfile-cd -t ghcr.io/${REPO_OWNER_LC}/spring-backend:latest .
 
       - name: Push Docker image
         run: docker push ghcr.io/${REPO_OWNER_LC}/spring-backend:latest
