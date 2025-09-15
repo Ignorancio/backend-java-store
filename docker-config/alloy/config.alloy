@@ -1,0 +1,18 @@
+local.file_match "springboot_logs" {
+  path_targets = [{
+    "__path__"  = "/var/log/app/*.log",
+    "job"       = "springboot",
+    "hostname"  = constants.hostname,
+  }]
+}
+
+loki.source.file "springboot_logs" {
+  targets = local.file_match.springboot_logs.targets
+  forward_to = [loki.write.main.receiver]
+}
+
+loki.write "main" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
