@@ -1,4 +1,6 @@
-package com.example.store.category.domain;
+package com.example.store.category.application;
+
+import com.example.store.category.domain.Category;
 
 import java.util.List;
 

@@ -1,4 +1,6 @@
-package com.example.store.user.domain;
+package com.example.store.user.application;
+
+import com.example.store.user.domain.User;
 
 import java.util.List;
 import java.util.UUID;

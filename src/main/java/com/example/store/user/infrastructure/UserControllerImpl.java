@@ -1,7 +1,7 @@
 package com.example.store.user.infrastructure;
 
+import com.example.store.user.application.UserService;
 import com.example.store.user.domain.User;
-import com.example.store.user.domain.UserService;
 import com.example.store.user.infrastructure.dto.UserDTO;
 import com.example.store.user.infrastructure.mapper.UserMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,7 +18,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
-@Tag(description = "UserAPI",name = "User Services")
+@Tag(description = "UserAPI", name = "User Services")
 public class UserControllerImpl implements UserController {
 
     private final UserService userService;

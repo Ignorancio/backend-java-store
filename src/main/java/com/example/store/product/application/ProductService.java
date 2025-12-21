@@ -1,5 +1,6 @@
-package com.example.store.product.domain;
+package com.example.store.product.application;
 
+import com.example.store.product.domain.Product;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;

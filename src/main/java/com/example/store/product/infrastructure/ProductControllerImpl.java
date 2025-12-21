@@ -1,7 +1,7 @@
 package com.example.store.product.infrastructure;
 
+import com.example.store.product.application.ProductService;
 import com.example.store.product.domain.Product;
-import com.example.store.product.domain.ProductService;
 import com.example.store.product.infrastructure.dto.ProductDTO;
 import com.example.store.product.infrastructure.mapper.ProductMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,8 +21,8 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/v1/products")
 @RequiredArgsConstructor
-@Tag(name = "Product Services",description = "Operations related to products")
-public class ProductControllerImpl implements ProductController{
+@Tag(name = "Product Services", description = "Operations related to products")
+public class ProductControllerImpl implements ProductController {
 
     private final ProductService productService;
     private final ProductMapper productMapper;

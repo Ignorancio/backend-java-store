@@ -1,7 +1,7 @@
 package com.example.store.category.infrastructure;
 
+import com.example.store.category.application.CategoryService;
 import com.example.store.category.domain.Category;
-import com.example.store.category.domain.CategoryService;
 import com.example.store.category.infrastructure.dto.CategoryDTO;
 import com.example.store.category.infrastructure.mapper.CategoryMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -52,7 +52,7 @@ public class CategoryControllerImpl implements CategoryController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Update a category")
-    public ResponseEntity<Category> update(@PathVariable Long id,@Valid @RequestBody CategoryDTO category) {
+    public ResponseEntity<Category> update(@PathVariable Long id, @Valid @RequestBody CategoryDTO category) {
         Category category1 = categoryMapper.categoryDTOToCategory(category);
         category1.setId(id);
         Category savedCategory = categoryService.update(category1);

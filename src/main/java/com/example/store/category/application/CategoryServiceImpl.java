@@ -2,7 +2,6 @@ package com.example.store.category.application;
 
 import com.example.store.category.domain.Category;
 import com.example.store.category.domain.CategoryRepository;
-import com.example.store.category.domain.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +14,7 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
 
     public Category save(Category category) {
-        if(categoryRepository.existsByName(category.getName())) {
+        if (categoryRepository.existsByName(category.getName())) {
             throw new IllegalArgumentException("Categoria ya existe");
         }
         return categoryRepository.save(category);

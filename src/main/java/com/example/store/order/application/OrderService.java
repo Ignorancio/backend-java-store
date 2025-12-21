@@ -1,4 +1,7 @@
-package com.example.store.order.domain;
+package com.example.store.order.application;
+
+import com.example.store.order.domain.Order;
+import com.example.store.order.domain.OrderDetails;
 
 import java.util.List;
 import java.util.UUID;
