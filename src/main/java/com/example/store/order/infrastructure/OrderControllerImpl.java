@@ -2,9 +2,9 @@ package com.example.store.order.infrastructure;
 
 import com.example.store.order.application.OrderServiceImpl;
 import com.example.store.order.domain.Order;
+import com.example.store.order.domain.OrderDetails;
 import com.example.store.order.infrastructure.dto.OrderDTO;
 import com.example.store.order.infrastructure.mapper.OrderMapper;
-import com.example.store.user.domain.Role;
 import com.example.store.user.infrastructure.entity.UserEntity;
 import com.example.store.user.infrastructure.mapper.UserMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,8 +13,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,8 +23,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/orders")
 @RequiredArgsConstructor
-@Tag(name = "Order Services",description = "Operations related to orders")
-public class OrderControllerImpl implements OrderController{
+@Tag(name = "Order Services", description = "Operations related to orders")
+public class OrderControllerImpl implements OrderController {
 
     private final OrderServiceImpl orderService;
     private final OrderMapper orderMapper;
@@ -31,51 +32,35 @@ public class OrderControllerImpl implements OrderController{
 
     @PostMapping
     @Operation(summary = "Create a new order")
-    public ResponseEntity<Order> save(@RequestBody @Valid OrderDTO orderDTO) {
+    public ResponseEntity<Order> save(@AuthenticationPrincipal UserEntity userAuth, @RequestBody @Valid OrderDTO orderDTO) {
         Order order = orderMapper.OrderDTOToOrder(orderDTO);
-        Object auth = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if(auth instanceof UserEntity userEntity){
-            order.setUser(userMapper.userEntityToUser(userEntity));
-            return ResponseEntity.status(HttpStatus.CREATED).body(orderService.save(order));
-        }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        order.setUser(userMapper.userEntityToUser(userAuth));
+        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.save(order));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Return an order by order id, but you must be the owner or an administrator")
-    public ResponseEntity<Order> findById(@PathVariable Long id) {
-        Object auth = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!(auth instanceof UserEntity userAuth)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-        }
+    public ResponseEntity<Order> findById(@AuthenticationPrincipal UserEntity userAuth, @PathVariable Long id) {
         Order order = orderService.findById(id);
-        if (!order.getUser().getId().equals(userAuth.getId()) && !userAuth.getRoles().contains(Role.ADMIN)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-        }
-        return ResponseEntity.status(HttpStatus.OK).body(order);
+
+        checkAuthority(order, userAuth);
+
+        return ResponseEntity.ok(order);
     }
 
     @GetMapping
     @Operation(summary = "Returns a list of all orders associated with the authenticated user")
-    public ResponseEntity<List<Order>> findByUserId() {
-        Object auth = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if(auth instanceof UserEntity userAuth){
-            return ResponseEntity.status(HttpStatus.OK).body(orderService.findByUserId(userAuth.getId()));
-        }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+    public ResponseEntity<List<Order>> findByUserId(@AuthenticationPrincipal UserEntity userAuth) {
+        return ResponseEntity.status(HttpStatus.OK).body(orderService.findByUserId(userAuth.getId()));
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a order by id, but you must be the owner or an administrator")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        Object auth = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!(auth instanceof UserEntity userAuth)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-        }
+    public ResponseEntity<Void> delete(@AuthenticationPrincipal UserEntity userAuth, @PathVariable Long id) {
         Order order = orderService.findById(id);
-        if (!order.getUser().getId().equals(userAuth.getId()) && !userAuth.getRoles().contains(Role.ADMIN)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-        }
+
+        checkAuthority(order, userAuth);
+
         orderService.delete(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
@@ -89,7 +74,26 @@ public class OrderControllerImpl implements OrderController{
 
     @PutMapping("/{id}")
     @Operation(summary = "Update an order by id, but you must be the owner or an administrator")
-    public ResponseEntity<Order> update(@PathVariable Long id, @RequestBody @Valid OrderDTO orderDTO) {
-        return ResponseEntity.status(HttpStatus.OK).body(orderService.addOrderDetails(id, orderDTO.orderDetails().stream().map(orderMapper::orderdetailsDTOToOrderDetails).toList()));
+    public ResponseEntity<Order> update(@AuthenticationPrincipal UserEntity userAuth, @PathVariable Long id, @RequestBody @Valid OrderDTO orderDTO) {
+        Order existingOrder = orderService.findById(id);
+
+        checkAuthority(existingOrder, userAuth);
+
+        List<OrderDetails> details = orderDTO.orderDetails().stream()
+                .map(orderMapper::orderdetailsDTOToOrderDetails)
+                .toList();
+
+        return ResponseEntity.ok(orderService.addOrderDetails(id, details));
+    }
+
+    private void checkAuthority(Order order, UserEntity userAuth) {
+        boolean isOwner = order.getUser().getId().equals(userAuth.getId());
+        boolean isAdmin = userAuth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!isOwner && !isAdmin) {
+            // Lanzar una excepción personalizada o AccessDeniedException de Spring Security
+            throw new AccessDeniedException("No tienes permiso para acceder a este pedido");
+        }
     }
 }
