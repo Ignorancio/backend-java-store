@@ -1,15 +1,16 @@
 package com.example.store.config.infrastructure.filter;
 
+import com.example.store.config.application.JwtService;
 import com.example.store.user.domain.User;
 import com.example.store.user.infrastructure.entity.UserEntity;
 import com.example.store.user.infrastructure.mapper.UserMapper;
 import com.example.store.user.infrastructure.repository.QueryUserRepository;
-import com.example.store.config.application.JwtService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -39,20 +40,28 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
-        try{
-            final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        try {
+            String jwt = getJwtFromCookie(request);
+
+            if (jwt == null) {
+                final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+                if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                    jwt = authHeader.substring(7);
+                }
+            }
+            if (jwt == null) {
                 filterChain.doFilter(request, response);
                 return;
             }
-            final String jwt = authHeader.substring(7);
+
             final String id = jwtService.extractSubject(jwt);
             final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
             if (id == null || authentication != null) {
                 filterChain.doFilter(request, response);
                 return;
             }
-            final UserEntity user = userRepository.findById(UUID.fromString(id)).orElseThrow(()-> new IllegalArgumentException("Usuario no encontrado"));
+            final UserEntity user = userRepository.findById(UUID.fromString(id)).orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
             final User user1 = userMapper.userEntityToUser(user);
 
@@ -71,23 +80,19 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             }
 
             filterChain.doFilter(request, response);
-        }
-        catch (ExpiredJwtException e){
+        } catch (ExpiredJwtException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.getWriter().write(
                     "{ \"error\": \"Unauthorized\", \"message\": \"Token expirado\" }"
             );
-        }
-        catch (SignatureException e){
+        } catch (SignatureException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.getWriter().write(
                     "{ \"error\": \"Unauthorized\", \"message\": \"Token invalido\" }"
             );
-        }
-        catch (MalformedJwtException e)
-        {
+        } catch (MalformedJwtException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.getWriter().write(
@@ -95,5 +100,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             );
         }
 
+    }
+
+    private String getJwtFromCookie(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("access_token".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
     }
 }

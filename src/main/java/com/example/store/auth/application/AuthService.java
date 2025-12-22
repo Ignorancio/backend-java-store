@@ -3,10 +3,10 @@ package com.example.store.auth.application;
 import com.example.store.auth.infrastructure.AuthRequest;
 import com.example.store.auth.infrastructure.RegisterRequest;
 import com.example.store.auth.infrastructure.TokenResponse;
+import com.example.store.config.application.JwtService;
 import com.example.store.user.domain.Role;
 import com.example.store.user.domain.User;
 import com.example.store.user.domain.UserRepository;
-import com.example.store.config.application.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,7 +27,7 @@ public class AuthService {
     private final UserRepository userRepository;
 
     public TokenResponse register(final RegisterRequest request) {
-        if(userRepository.existsByEmail(request.email())) {
+        if (userRepository.existsByEmail(request.email())) {
             throw new IllegalArgumentException("Usuario ya existe");
         }
         final User user = User.builder()
@@ -46,14 +46,14 @@ public class AuthService {
     public TokenResponse authenticate(final AuthRequest request) {
         final User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no existe"));
-        try{
+        try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             request.email(),
                             request.password()
                     )
             );
-        }catch (AuthenticationException e){
+        } catch (AuthenticationException e) {
             throw new IllegalArgumentException("Credenciales invalidas");
         }
         final String accessToken = jwtService.generateToken(user);
@@ -61,13 +61,9 @@ public class AuthService {
         return new TokenResponse(accessToken, refreshToken);
     }
 
-    public TokenResponse refreshToken(@NonNull final String authentication) {
-        if (!authentication.startsWith("Bearer ")) {
-            throw new IllegalArgumentException("Invalid auth header");
-        }
-        final String refreshToken = authentication.substring(7);
+    public TokenResponse refreshToken(@NonNull final String refreshToken) {
         final String username = jwtService.extractSubject(refreshToken);
-        if(username == null) {
+        if (username == null) {
             throw new IllegalArgumentException("Invalid token");
         }
         final User user = this.userRepository.findByEmail(username).orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
@@ -81,7 +77,7 @@ public class AuthService {
     }
 
     public TokenResponse registerAdmin(final RegisterRequest request) {
-        if(userRepository.existsByEmail(request.email())) {
+        if (userRepository.existsByEmail(request.email())) {
             throw new IllegalArgumentException("Usuario ya existe");
         }
         final User user = User.builder()
