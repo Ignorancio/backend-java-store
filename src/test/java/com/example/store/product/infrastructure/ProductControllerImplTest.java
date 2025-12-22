@@ -1,7 +1,6 @@
 package com.example.store.product.infrastructure;
 
 import com.example.store.auth.infrastructure.RegisterRequest;
-import com.example.store.auth.infrastructure.TokenResponse;
 import com.example.store.category.infrastructure.repository.QueryCategoryRepository;
 import com.example.store.product.domain.Product;
 import com.example.store.product.infrastructure.dto.ProductDTO;
@@ -10,6 +9,7 @@ import com.example.store.product.infrastructure.repository.QueryProductImageRepo
 import com.example.store.product.infrastructure.repository.QueryProductRepository;
 import com.example.store.user.infrastructure.repository.QueryUserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -46,14 +46,13 @@ class ProductControllerImplTest {
     @Autowired
     private QueryUserRepository userRepository;
 
-    private String jwtAdmin = "";
-
-    private String jwtUser = "";
+    private String cookieUser = "";
+    private String cookieAdmin = "";
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeAll
-    void setUpAll() throws Exception{
+    void setUpAll() throws Exception {
 
         cacheProductRepository.deleteAll();
         productRepository.deleteAll();
@@ -61,6 +60,7 @@ class ProductControllerImplTest {
         categoryRepository.deleteAll();
         userRepository.deleteAll();
 
+        // --- REGISTRO ADMIN ---
         RegisterRequest authRequest = new RegisterRequest("admin@admin", "admin");
 
         String json = objectMapper.writeValueAsString(authRequest);
@@ -71,14 +71,10 @@ class ProductControllerImplTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String jsonResponse = mvcResult.getResponse().getContentAsString();
+        cookieAdmin = mvcResult.getResponse().getCookie("access_token").getValue();
 
-        TokenResponse response = objectMapper.readValue(jsonResponse, TokenResponse.class);
-
-        jwtAdmin = response.accessToken();
-
+        // --- REGISTRO USER ---
         RegisterRequest authRequestUser = new RegisterRequest("user@user", "user");
-
         String jsonUser = objectMapper.writeValueAsString(authRequestUser);
 
         MvcResult mvcResultUser = mockMvc.perform(MockMvcRequestBuilders.post("http://localhost:8080/auth/register")
@@ -87,11 +83,8 @@ class ProductControllerImplTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String jsonResponseUser = mvcResultUser.getResponse().getContentAsString();
+        cookieUser = mvcResultUser.getResponse().getCookie("access_token").getValue();
 
-        TokenResponse responseUser = objectMapper.readValue(jsonResponseUser, TokenResponse.class);
-
-        jwtUser = responseUser.accessToken();
     }
 
     @AfterEach
@@ -113,14 +106,14 @@ class ProductControllerImplTest {
         ProductDTO productDTO = new ProductDTO("product 1", "description 1", 100.0, 100, "category 1");
         String productJson = objectMapper.writeValueAsString(productDTO);
 
-        MockMultipartFile productFile = new MockMultipartFile("product","","application/json", productJson.getBytes());
+        MockMultipartFile productFile = new MockMultipartFile("product", "", "application/json", productJson.getBytes());
 
         MockMultipartFile filePart = new MockMultipartFile("file", "product1.jpg", "image/jpeg", "image content".getBytes());
 
         MvcResult mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/products")
                         .file(productFile)
                         .file(filePart)
-                        .header("Authorization", "Bearer " + jwtAdmin)
+                        .cookie(new Cookie("access_token", cookieAdmin))
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isCreated())
                 .andReturn();
@@ -149,14 +142,14 @@ class ProductControllerImplTest {
         ProductDTO productDTO = new ProductDTO("product 1", "description 1", 100.0, 100, "category 1");
         String productJson = objectMapper.writeValueAsString(productDTO);
 
-        MockMultipartFile productFile = new MockMultipartFile("product","","application/json", productJson.getBytes());
+        MockMultipartFile productFile = new MockMultipartFile("product", "", "application/json", productJson.getBytes());
 
         MockMultipartFile filePart = new MockMultipartFile("file", "product1.jpg", "image/jpeg", "image content".getBytes());
 
         MvcResult mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart("http://localhost:8080/api/v1/products")
                         .file(productFile)
                         .file(filePart)
-                        .header("Authorization", "Bearer " + jwtAdmin)
+                        .cookie(new Cookie("access_token", cookieAdmin))
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isCreated())
                 .andReturn();
@@ -183,19 +176,19 @@ class ProductControllerImplTest {
     }
 
     @Test
-    void updateProductWithoutImageWhenUserIsAdminShouldReturnProductUpdate () throws Exception {
+    void updateProductWithoutImageWhenUserIsAdminShouldReturnProductUpdate() throws Exception {
 
         ProductDTO productDTO = new ProductDTO("product 1", "description 1", 100.0, 100, "category 1");
         String productJson = objectMapper.writeValueAsString(productDTO);
 
-        MockMultipartFile productFile = new MockMultipartFile("product","","application/json", productJson.getBytes());
+        MockMultipartFile productFile = new MockMultipartFile("product", "", "application/json", productJson.getBytes());
 
         MockMultipartFile filePart = new MockMultipartFile("file", "product1.jpg", "image/jpeg", "image content".getBytes());
 
         MvcResult mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart("http://localhost:8080/api/v1/products")
                         .file(productFile)
                         .file(filePart)
-                        .header("Authorization", "Bearer " + jwtAdmin)
+                        .cookie(new Cookie("access_token", cookieAdmin))
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isCreated())
                 .andReturn();
@@ -211,11 +204,11 @@ class ProductControllerImplTest {
 
         String updatedProductJson = objectMapper.writeValueAsString(productToUpdate);
 
-        MockMultipartFile updatedProductFile = new MockMultipartFile("product","","application/json", updatedProductJson.getBytes());
+        MockMultipartFile updatedProductFile = new MockMultipartFile("product", "", "application/json", updatedProductJson.getBytes());
 
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT,"/api/v1/products/"+product.getId().toString())
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT, "/api/v1/products/" + product.getId().toString())
                         .file(updatedProductFile)
-                        .header("Authorization", "Bearer " + jwtAdmin)
+                        .cookie(new Cookie("access_token", cookieAdmin))
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -238,19 +231,19 @@ class ProductControllerImplTest {
     }
 
     @Test
-    void updateProductWithImageWhenUserIsAdminShouldReturnProductUpdate () throws Exception {
+    void updateProductWithImageWhenUserIsAdminShouldReturnProductUpdate() throws Exception {
 
         ProductDTO productDTO = new ProductDTO("product 1", "description 1", 100.0, 100, "category 1");
         String productJson = objectMapper.writeValueAsString(productDTO);
 
-        MockMultipartFile productFile = new MockMultipartFile("product","","application/json", productJson.getBytes());
+        MockMultipartFile productFile = new MockMultipartFile("product", "", "application/json", productJson.getBytes());
 
         MockMultipartFile filePart = new MockMultipartFile("file", "product1.jpg", "image/jpeg", "image content".getBytes());
 
         MvcResult mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart("http://localhost:8080/api/v1/products")
                         .file(productFile)
                         .file(filePart)
-                        .header("Authorization", "Bearer " + jwtAdmin)
+                        .cookie(new Cookie("access_token", cookieAdmin))
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isCreated())
                 .andReturn();
@@ -266,14 +259,14 @@ class ProductControllerImplTest {
 
         String updatedProductJson = objectMapper.writeValueAsString(productToUpdate);
 
-        MockMultipartFile updatedProductFile = new MockMultipartFile("product","","application/json", updatedProductJson.getBytes());
+        MockMultipartFile updatedProductFile = new MockMultipartFile("product", "", "application/json", updatedProductJson.getBytes());
 
         MockMultipartFile filePartUpdate = new MockMultipartFile("file", "product2.jpg", "image/jpeg", "image content update".getBytes());
 
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT,"/api/v1/products/"+product.getId().toString())
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT, "/api/v1/products/" + product.getId().toString())
                         .file(updatedProductFile)
                         .file(filePartUpdate)
-                        .header("Authorization", "Bearer " + jwtAdmin)
+                        .cookie(new Cookie("access_token", cookieAdmin))
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -301,14 +294,14 @@ class ProductControllerImplTest {
         ProductDTO productDTO = new ProductDTO("product 1", "description 1", 100.0, 100, "category 1");
         String productJson = objectMapper.writeValueAsString(productDTO);
 
-        MockMultipartFile productFile = new MockMultipartFile("product","","application/json", productJson.getBytes());
+        MockMultipartFile productFile = new MockMultipartFile("product", "", "application/json", productJson.getBytes());
 
         MockMultipartFile filePart = new MockMultipartFile("file", "product1.jpg", "image/jpeg", "image content".getBytes());
 
         MvcResult mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart("http://localhost:8080/api/v1/products")
                         .file(productFile)
                         .file(filePart)
-                        .header("Authorization", "Bearer " + jwtAdmin)
+                        .cookie(new Cookie("access_token", cookieAdmin))
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isCreated())
                 .andReturn();
@@ -316,11 +309,11 @@ class ProductControllerImplTest {
         String response = mockMvcResult.getResponse().getContentAsString();
         Product product = objectMapper.readValue(response, Product.class);
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/products/"+product.getId().toString())
-                        .header("Authorization", "Bearer " + jwtAdmin))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/products/" + product.getId().toString())
+                        .cookie(new Cookie("access_token", cookieAdmin)))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get("/api/v1/products/"+product.getId().toString()))
+        mockMvc.perform(get("/api/v1/products/" + product.getId().toString()))
                 .andExpect(status().isBadRequest());
 
         assertEquals(0, productRepository.count());
@@ -332,14 +325,14 @@ class ProductControllerImplTest {
         ProductDTO productDTO = new ProductDTO("product 1", "description 1", 100.0, 100, "category 1");
         String productJson = objectMapper.writeValueAsString(productDTO);
 
-        MockMultipartFile productFile = new MockMultipartFile("product","","application/json", productJson.getBytes());
+        MockMultipartFile productFile = new MockMultipartFile("product", "", "application/json", productJson.getBytes());
 
         MockMultipartFile filePart = new MockMultipartFile("file", "product1.jpg", "image/jpeg", "image content".getBytes());
 
         MvcResult mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart("http://localhost:8080/api/v1/products")
                         .file(productFile)
                         .file(filePart)
-                        .header("Authorization", "Bearer " + jwtAdmin)
+                        .cookie(new Cookie("access_token", cookieAdmin))
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isCreated())
                 .andReturn();
@@ -347,8 +340,8 @@ class ProductControllerImplTest {
         String response = mockMvcResult.getResponse().getContentAsString();
         Product product = objectMapper.readValue(response, Product.class);
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/products/"+product.getId().toString())
-                        .header("Authorization", "Bearer " + jwtUser))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/products/" + product.getId().toString())
+                        .cookie(new Cookie("access_token", cookieUser)))
                 .andExpect(status().isForbidden());
 
         assertEquals(1, productRepository.count());

@@ -1,18 +1,14 @@
 package com.example.store.category.infrastructure
 
 import com.example.store.auth.infrastructure.RegisterRequest
-import com.example.store.auth.infrastructure.TokenResponse
 import com.example.store.category.domain.Category
 import com.example.store.category.infrastructure.dto.CategoryDTO
 import com.example.store.category.infrastructure.repository.QueryCategoryRepository
 import com.example.store.product.infrastructure.repository.QueryProductRepository
 import com.example.store.user.infrastructure.repository.QueryUserRepository
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import jakarta.servlet.http.Cookie
+import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -34,12 +30,12 @@ class CategoryControllerImplTest(
     @Autowired private val categoryRepository: QueryCategoryRepository,
     @Autowired private val userRepository: QueryUserRepository
 ) {
-    private var JWTadmin: String = ""
+    private lateinit var cookieAdmin: String
 
     private val objectMapper = ObjectMapper()
 
     @BeforeAll
-    fun setUpAll(){
+    fun setUpAll() {
 
         productRepository.deleteAll()
         categoryRepository.deleteAll()
@@ -49,17 +45,15 @@ class CategoryControllerImplTest(
 
         val json = objectMapper.writeValueAsString(authRequest)
 
-        val mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/admin")
+        val mvcResult = mockMvc.perform(
+            MockMvcRequestBuilders.post("/auth/register/admin")
                 .contentType("application/json")
-                .content(json))
+                .content(json)
+        )
             .andExpect(status().isOk)
             .andReturn()
 
-        val jsonResponse = mvcResult.response.contentAsString
-
-        val response = objectMapper.readValue(jsonResponse, TokenResponse::class.java)
-
-        JWTadmin = response.accessToken
+        cookieAdmin = mvcResult.response.getCookie("access_token")?.value ?: ""
     }
 
     @AfterEach
@@ -78,10 +72,12 @@ class CategoryControllerImplTest(
         val categoryDTO = CategoryDTO("category 1")
         val categoryJson = objectMapper.writeValueAsString(categoryDTO)
 
-        val mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/categories")
-                    .contentType("application/json")
-                    .content(categoryJson)
-                    .header("Authorization", "Bearer $JWTadmin"))
+        val mockMvcResult = mockMvc.perform(
+            MockMvcRequestBuilders.post("/api/v1/categories")
+                .contentType("application/json")
+                .content(categoryJson)
+                .cookie(Cookie("access_token", cookieAdmin))
+        )
             .andExpect(status().isCreated)
             .andReturn()
 
@@ -96,21 +92,23 @@ class CategoryControllerImplTest(
     }
 
     @Test
-    fun findAll(){
+    fun findAll() {
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/categories"))
             .andExpect(status().isOk)
             .andReturn()
     }
 
     @Test
-    fun findById(){
+    fun findById() {
         val categoryDTO = CategoryDTO("category 1")
         val categoryJson = objectMapper.writeValueAsString(categoryDTO)
 
-        val mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/categories")
-                    .contentType("application/json")
-                    .content(categoryJson)
-                    .header("Authorization", "Bearer $JWTadmin"))
+        val mockMvcResult = mockMvc.perform(
+            MockMvcRequestBuilders.post("/api/v1/categories")
+                .contentType("application/json")
+                .content(categoryJson)
+                .cookie(Cookie("access_token", cookieAdmin))
+        )
             .andExpect(status().isCreated)
             .andReturn()
 
@@ -126,19 +124,20 @@ class CategoryControllerImplTest(
 
         assertEquals(category.id, categoryFind.id)
         assertEquals("category 1", categoryFind.name)
-
         assertEquals(1, categoryRepository.count())
     }
 
     @Test
-    fun update(){
+    fun update() {
         val categoryDTO = CategoryDTO("category 1")
         val categoryJson = objectMapper.writeValueAsString(categoryDTO)
 
-        val mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/categories")
-                    .contentType("application/json")
-                    .content(categoryJson)
-                    .header("Authorization", "Bearer $JWTadmin"))
+        val mockMvcResult = mockMvc.perform(
+            MockMvcRequestBuilders.post("/api/v1/categories")
+                .contentType("application/json")
+                .content(categoryJson)
+                .cookie(Cookie("access_token", cookieAdmin))
+        )
             .andExpect(status().isCreated)
             .andReturn()
 
@@ -148,10 +147,12 @@ class CategoryControllerImplTest(
         val categoryDTOUpdate = CategoryDTO("category 2")
         val categoryJsonUpdate = objectMapper.writeValueAsString(categoryDTOUpdate)
 
-        val mockMvcResultUpdate = mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/categories/${category.id}")
+        val mockMvcResultUpdate = mockMvc.perform(
+            MockMvcRequestBuilders.put("/api/v1/categories/${category.id}")
                 .contentType("application/json")
                 .content(categoryJsonUpdate)
-                .header("Authorization", "Bearer $JWTadmin"))
+                .cookie(Cookie("access_token", cookieAdmin))
+        )
             .andExpect(status().isOk)
             .andReturn()
 
@@ -165,22 +166,26 @@ class CategoryControllerImplTest(
     }
 
     @Test
-    fun delete(){
+    fun delete() {
         val categoryDTO = CategoryDTO("category 1")
         val categoryJson = objectMapper.writeValueAsString(categoryDTO)
 
-        val mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/categories")
-                    .contentType("application/json")
-                    .content(categoryJson)
-                    .header("Authorization", "Bearer $JWTadmin"))
+        val mockMvcResult = mockMvc.perform(
+            MockMvcRequestBuilders.post("/api/v1/categories")
+                .contentType("application/json")
+                .content(categoryJson)
+                .cookie(Cookie("access_token", cookieAdmin))
+        )
             .andExpect(status().isCreated)
             .andReturn()
 
         val response = mockMvcResult.response.contentAsString
         val category = objectMapper.readValue(response, Category::class.java)
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/categories/${category.id}")
-                    .header("Authorization", "Bearer $JWTadmin"))
+        mockMvc.perform(
+            MockMvcRequestBuilders.delete("/api/v1/categories/${category.id}")
+                .cookie(Cookie("access_token", cookieAdmin))
+        )
             .andExpect(status().isNoContent)
             .andReturn()
 

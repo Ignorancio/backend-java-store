@@ -1,9 +1,9 @@
 package com.example.store.user.infrastructure
 
 import com.example.store.auth.infrastructure.RegisterRequest
-import com.example.store.auth.infrastructure.TokenResponse
 import com.example.store.user.infrastructure.repository.QueryUserRepository
 import com.fasterxml.jackson.databind.ObjectMapper
+import jakarta.servlet.http.Cookie
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -24,7 +24,7 @@ class UserControllerTest(
     @Autowired private val mockMvc: MockMvc,
     @Autowired private val userRepository: QueryUserRepository
 ) {
-    private lateinit var jwtAdmin: String
+    private lateinit var cookieAdmin: String
 
     private val objectMapper = ObjectMapper()
 
@@ -35,15 +35,15 @@ class UserControllerTest(
         val authRequest = RegisterRequest("admin@admin", "admin")
         val json = objectMapper.writeValueAsString(authRequest)
 
-        val mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/admin")
-            .contentType("application/json")
-            .content(json))
+        val mvcResult = mockMvc.perform(
+            MockMvcRequestBuilders.post("/auth/register/admin")
+                .contentType("application/json")
+                .content(json)
+        )
             .andExpect(status().isOk)
             .andReturn()
 
-        val jsonResponse = mvcResult.response.contentAsString
-        val response = objectMapper.readValue(jsonResponse, TokenResponse::class.java)
-        jwtAdmin = response.accessToken
+        cookieAdmin = mvcResult.response.getCookie("access_token")?.value ?: ""
     }
 
     @AfterAll
@@ -53,8 +53,10 @@ class UserControllerTest(
 
     @Test
     fun findAllUsersShouldReturnAllUsers() {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/users")
-            .header("Authorization", "Bearer $jwtAdmin"))
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/v1/users")
+                .cookie(Cookie("access_token", cookieAdmin))
+        )
             .andExpect(status().isOk)
             .andReturn()
     }

@@ -1,7 +1,6 @@
 package com.example.store.order.infrastructure
 
 import com.example.store.auth.infrastructure.RegisterRequest
-import com.example.store.auth.infrastructure.TokenResponse
 import com.example.store.order.domain.Order
 import com.example.store.order.infrastructure.dto.OrderDTO
 import com.example.store.order.infrastructure.dto.OrderDetailsDTO
@@ -13,13 +12,10 @@ import com.example.store.product.infrastructure.mapper.ProductMapper
 import com.example.store.product.infrastructure.repository.QueryProductRepository
 import com.example.store.user.infrastructure.repository.QueryUserRepository
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import jakarta.servlet.http.Cookie
+import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -40,9 +36,9 @@ class OrderControllerImplTest(
     @Autowired private val userRepository: QueryUserRepository,
     @Autowired private val productMapper: ProductMapper
 ) {
-    private lateinit var jwtUser: String
-    private lateinit var jwtUser2: String
-    private lateinit var jwtAdmin: String
+    private lateinit var cookieUser: String
+    private lateinit var cookieUser2: String
+    private lateinit var cookieAdmin: String
 
     private val objectMapper = ObjectMapper()
 
@@ -51,59 +47,78 @@ class OrderControllerImplTest(
     private lateinit var product3: Product
 
     @BeforeAll
-    fun setUpAll(){
+    fun setUpAll() {
 
         orderDetailsRepository.deleteAll()
         orderRepository.deleteAll()
         productRepository.deleteAll()
         userRepository.deleteAll()
 
+        // --- REGISTRO USER 1 ---
         val authRequest = RegisterRequest("user@user", "user")
         val json = objectMapper.writeValueAsString(authRequest)
 
-        val mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/auth/register")
+        val mvcResult = mockMvc.perform(
+            MockMvcRequestBuilders.post("/auth/register")
                 .contentType("application/json")
-                .content(json))
+                .content(json)
+        )
             .andExpect(status().isOk)
             .andReturn()
 
-        val jsonResponse = mvcResult.response.contentAsString
-        val response = objectMapper.readValue(jsonResponse, TokenResponse::class.java)
-        jwtUser = response.accessToken
+        // Extraer cookie
+        cookieUser = mvcResult.response.getCookie("access_token")?.value ?: ""
 
 
+        // --- REGISTRO USER 2 ---
         val authRequest2 = RegisterRequest("user2@user", "user2")
         val json2 = objectMapper.writeValueAsString(authRequest2)
 
-        val mvcResult2 = mockMvc.perform(MockMvcRequestBuilders.post("/auth/register")
-            .contentType("application/json")
-            .content(json2))
+        val mvcResult2 = mockMvc.perform(
+            MockMvcRequestBuilders.post("/auth/register")
+                .contentType("application/json")
+                .content(json2)
+        )
             .andExpect(status().isOk)
             .andReturn()
 
-        val jsonResponse2 = mvcResult2.response.contentAsString
-        val response2 = objectMapper.readValue(jsonResponse2, TokenResponse::class.java)
-        jwtUser2 = response2.accessToken
+        // Extraer cookie
+        cookieUser2 = mvcResult2.response.getCookie("access_token")?.value ?: ""
 
+
+        // --- REGISTRO ADMIN ---
         val authRequestAdmin = RegisterRequest("admin@admin", "admin")
         val jsonAdmin = objectMapper.writeValueAsString(authRequestAdmin)
 
-        val mvcResultAdmin = mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/admin")
-            .contentType("application/json")
-            .content(jsonAdmin))
+        val mvcResultAdmin = mockMvc.perform(
+            MockMvcRequestBuilders.post("/auth/register/admin")
+                .contentType("application/json")
+                .content(jsonAdmin)
+        )
             .andExpect(status().isOk)
             .andReturn()
 
-        val jsonResponseAdmin = mvcResultAdmin.response.contentAsString
-        val responseAdmin = objectMapper.readValue(jsonResponseAdmin, TokenResponse::class.java)
-        jwtAdmin = responseAdmin.accessToken
+        // Extraer cookie
+        cookieAdmin = mvcResultAdmin.response.getCookie("access_token")?.value ?: ""
     }
 
     @BeforeEach
-    fun setup(){
-        product1 = productMapper.productEntityToProduct(productRepository.save(ProductEntity.builder().name("product1").description("description1").price(10.0).stock(100).build()))
-        product2 = productMapper.productEntityToProduct(productRepository.save(ProductEntity.builder().name("product2").description("description2").price(20.0).stock(200).build()))
-        product3 = productMapper.productEntityToProduct(productRepository.save(ProductEntity.builder().name("product3").description("description3").price(30.0).stock(300).build()))
+    fun setup() {
+        product1 = productMapper.productEntityToProduct(
+            productRepository.save(
+                ProductEntity.builder().name("product1").description("description1").price(10.0).stock(100).build()
+            )
+        )
+        product2 = productMapper.productEntityToProduct(
+            productRepository.save(
+                ProductEntity.builder().name("product2").description("description2").price(20.0).stock(200).build()
+            )
+        )
+        product3 = productMapper.productEntityToProduct(
+            productRepository.save(
+                ProductEntity.builder().name("product3").description("description3").price(30.0).stock(300).build()
+            )
+        )
     }
 
     @AfterEach
@@ -119,7 +134,7 @@ class OrderControllerImplTest(
     }
 
     @Test
-    fun saveReturnOrder(){
+    fun saveReturnOrder() {
         val orderDetailsDTO = listOf(
             OrderDetailsDTO(product1.id, 10),
             OrderDetailsDTO(product2.id, 15),
@@ -129,10 +144,12 @@ class OrderControllerImplTest(
 
         val orderJson = objectMapper.writeValueAsString(orderDTO)
 
-        val mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/orders")
-                    .contentType("application/json")
-                    .content(orderJson)
-                    .header("Authorization", "Bearer $jwtUser"))
+        val mockMvcResult = mockMvc.perform(
+            MockMvcRequestBuilders.post("/api/v1/orders")
+                .contentType("application/json")
+                .content(orderJson)
+                .cookie(Cookie("access_token", cookieUser))
+        )
             .andExpect(status().isCreated)
             .andReturn()
 
@@ -158,7 +175,7 @@ class OrderControllerImplTest(
     }
 
     @Test
-    fun saveWhenUserIsNotAuthenticatedShouldReturnUnauthorized(){
+    fun saveWhenUserIsNotAuthenticatedShouldReturnUnauthorized() {
         val orderDetailsDTO = listOf(
             OrderDetailsDTO(product1.id, 10),
             OrderDetailsDTO(product2.id, 15),
@@ -168,17 +185,19 @@ class OrderControllerImplTest(
 
         val orderJson = objectMapper.writeValueAsString(orderDTO)
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/orders")
-                    .contentType("application/json")
-                    .content(orderJson))
-            .andExpect(status().isBadRequest)
+        mockMvc.perform(
+            MockMvcRequestBuilders.post("/api/v1/orders")
+                .contentType("application/json")
+                .content(orderJson)
+        )
+            .andExpect(status().isUnauthorized)
 
         assertEquals(0, orderRepository.count())
         assertEquals(0, orderDetailsRepository.count())
     }
 
     @Test
-    fun saveWhenProductStockIsNotEnoughShouldReturnBadRequest(){
+    fun saveWhenProductStockIsNotEnoughShouldReturnBadRequest() {
         val orderDetailsDTO = listOf(
             OrderDetailsDTO(product1.id, 1000),
             OrderDetailsDTO(product2.id, 15),
@@ -188,23 +207,25 @@ class OrderControllerImplTest(
 
         val orderJson = objectMapper.writeValueAsString(orderDTO)
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/orders")
-                    .contentType("application/json")
-                    .content(orderJson)
-                    .header("Authorization", "Bearer $jwtUser"))
+        mockMvc.perform(
+            MockMvcRequestBuilders.post("/api/v1/orders")
+                .contentType("application/json")
+                .content(orderJson)
+                .cookie(Cookie("access_token", cookieUser))
+        )
             .andExpect(status().isBadRequest)
 
         assertEquals(0, orderRepository.count())
         assertEquals(0, orderDetailsRepository.count())
 
-        assertEquals(100,productRepository.findById(product1.id).get().stock)
-        assertEquals(200,productRepository.findById(product2.id).get().stock)
+        assertEquals(100, productRepository.findById(product1.id).get().stock)
+        assertEquals(200, productRepository.findById(product2.id).get().stock)
     }
 
     @Test
-    fun saveWhenProductIdDoesNotExistShouldReturnBadRequest(){
+    fun saveWhenProductIdDoesNotExistShouldReturnBadRequest() {
         val orderDetailsDTO = listOf(
-            OrderDetailsDTO(product1.id+3, 10),
+            OrderDetailsDTO(product1.id + 3, 10),
             OrderDetailsDTO(product2.id, 15),
         )
 
@@ -212,10 +233,12 @@ class OrderControllerImplTest(
 
         val orderJson = objectMapper.writeValueAsString(orderDTO)
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/orders")
-                    .contentType("application/json")
-                    .content(orderJson)
-                    .header("Authorization", "Bearer $jwtUser"))
+        mockMvc.perform(
+            MockMvcRequestBuilders.post("/api/v1/orders")
+                .contentType("application/json")
+                .content(orderJson)
+                .cookie(Cookie("access_token", cookieUser))
+        )
             .andExpect(status().isBadRequest)
 
         assertEquals(0, orderRepository.count())
@@ -223,7 +246,7 @@ class OrderControllerImplTest(
     }
 
     @Test
-    fun findByOrderIdWhenUserIsCreatorShouldReturnOrder(){
+    fun findByOrderIdWhenUserIsCreatorShouldReturnOrder() {
         val orderDetailsDTO = listOf(
             OrderDetailsDTO(product1.id, 10),
             OrderDetailsDTO(product2.id, 15),
@@ -233,18 +256,22 @@ class OrderControllerImplTest(
 
         val orderJson = objectMapper.writeValueAsString(orderDTO)
 
-        val mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/orders")
-                    .contentType("application/json")
-                    .content(orderJson)
-                    .header("Authorization", "Bearer $jwtUser"))
+        val mockMvcResult = mockMvc.perform(
+            MockMvcRequestBuilders.post("/api/v1/orders")
+                .contentType("application/json")
+                .content(orderJson)
+                .cookie(Cookie("access_token", cookieUser))
+        )
             .andExpect(status().isCreated)
             .andReturn()
 
         val response = mockMvcResult.response.contentAsString
         val order = objectMapper.readValue(response, Order::class.java)
 
-        val mockMvcFind = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/orders/${order.id}")
-                    .header("Authorization", "Bearer $jwtUser"))
+        val mockMvcFind = mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/v1/orders/${order.id}")
+                .cookie(Cookie("access_token", cookieUser))
+        )
             .andExpect(status().isOk)
             .andReturn()
 
@@ -271,7 +298,7 @@ class OrderControllerImplTest(
     }
 
     @Test
-    fun findByOrderIdWhenUserIsNotCreatorShouldReturnForbidden(){
+    fun findByOrderIdWhenUserIsNotCreatorShouldReturnForbidden() {
         val orderDetailsDTO = listOf(
             OrderDetailsDTO(product1.id, 10),
             OrderDetailsDTO(product2.id, 15),
@@ -281,18 +308,22 @@ class OrderControllerImplTest(
 
         val orderJson = objectMapper.writeValueAsString(orderDTO)
 
-        val mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/orders")
-                    .contentType("application/json")
-                    .content(orderJson)
-                    .header("Authorization", "Bearer $jwtUser"))
+        val mockMvcResult = mockMvc.perform(
+            MockMvcRequestBuilders.post("/api/v1/orders")
+                .contentType("application/json")
+                .content(orderJson)
+                .cookie(Cookie("access_token", cookieUser))
+        )
             .andExpect(status().isCreated)
             .andReturn()
 
         val response = mockMvcResult.response.contentAsString
         val order = objectMapper.readValue(response, Order::class.java)
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/orders/${order.id}")
-            .header("Authorization", "Bearer $jwtUser2"))
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/v1/orders/${order.id}")
+                .cookie(Cookie("access_token", cookieUser2))
+        )
             .andExpect(status().isForbidden)
     }
 
@@ -307,18 +338,22 @@ class OrderControllerImplTest(
 
         val orderJson = objectMapper.writeValueAsString(orderDTO)
 
-        val mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/orders")
-            .contentType("application/json")
-            .content(orderJson)
-            .header("Authorization", "Bearer $jwtUser"))
+        val mockMvcResult = mockMvc.perform(
+            MockMvcRequestBuilders.post("/api/v1/orders")
+                .contentType("application/json")
+                .content(orderJson)
+                .cookie(Cookie("access_token", cookieUser))
+        )
             .andExpect(status().isCreated)
             .andReturn()
 
         val response = mockMvcResult.response.contentAsString
         val order = objectMapper.readValue(response, Order::class.java)
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/orders/${order.id}")
-            .header("Authorization", "Bearer $jwtAdmin"))
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/v1/orders/${order.id}")
+                .cookie(Cookie("access_token", cookieAdmin))
+        )
             .andExpect(status().isOk)
     }
 
@@ -333,15 +368,19 @@ class OrderControllerImplTest(
 
         val orderJson = objectMapper.writeValueAsString(orderDTO)
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/orders")
-                    .contentType("application/json")
-                    .content(orderJson)
-                    .header("Authorization", "Bearer $jwtUser"))
+        mockMvc.perform(
+            MockMvcRequestBuilders.post("/api/v1/orders")
+                .contentType("application/json")
+                .content(orderJson)
+                .cookie(Cookie("access_token", cookieUser))
+        )
             .andExpect(status().isCreated)
             .andReturn()
 
-        val mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/orders")
-                    .header("Authorization", "Bearer $jwtUser"))
+        val mvcResult = mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/v1/orders")
+                .cookie(Cookie("access_token", cookieUser))
+        )
             .andExpect(status().isOk)
             .andReturn()
 
@@ -354,11 +393,11 @@ class OrderControllerImplTest(
     @Test
     fun findByUserIdWhenUserIsNotAuthenticatedShouldReturnUnauthorized() {
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/orders"))
-            .andExpect(status().isBadRequest)
+            .andExpect(status().isUnauthorized)
     }
 
     @Test
-    fun findAllWhenUserIsAdminReturnAllOrders(){
+    fun findAllWhenUserIsAdminReturnAllOrders() {
         val orderDetailsDTO = listOf(
             OrderDetailsDTO(product1.id, 10),
             OrderDetailsDTO(product2.id, 15),
@@ -368,15 +407,19 @@ class OrderControllerImplTest(
 
         val orderJson = objectMapper.writeValueAsString(orderDTO)
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/orders")
-                    .contentType("application/json")
-                    .content(orderJson)
-                    .header("Authorization", "Bearer $jwtUser"))
+        mockMvc.perform(
+            MockMvcRequestBuilders.post("/api/v1/orders")
+                .contentType("application/json")
+                .content(orderJson)
+                .cookie(Cookie("access_token", cookieUser))
+        )
             .andExpect(status().isCreated)
             .andReturn()
 
-        val mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/orders/all")
-                    .header("Authorization", "Bearer $jwtAdmin"))
+        val mvcResult = mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/v1/orders/all")
+                .cookie(Cookie("access_token", cookieAdmin))
+        )
             .andExpect(status().isOk)
             .andReturn()
 
@@ -387,9 +430,11 @@ class OrderControllerImplTest(
     }
 
     @Test
-    fun findAllWhenUserIsNotAdminReturnForbidden(){
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/orders/all")
-            .header("Authorization", "Bearer $jwtUser"))
+    fun findAllWhenUserIsNotAdminReturnForbidden() {
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/v1/orders/all")
+                .cookie(Cookie("access_token", cookieUser))
+        )
             .andExpect(status().isForbidden)
     }
 
@@ -404,24 +449,28 @@ class OrderControllerImplTest(
 
         val orderJson = objectMapper.writeValueAsString(orderDTO)
 
-        val mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/orders")
-                    .contentType("application/json")
-                    .content(orderJson)
-                    .header("Authorization", "Bearer $jwtUser"))
+        val mockMvcResult = mockMvc.perform(
+            MockMvcRequestBuilders.post("/api/v1/orders")
+                .contentType("application/json")
+                .content(orderJson)
+                .cookie(Cookie("access_token", cookieUser))
+        )
             .andExpect(status().isCreated)
             .andReturn()
 
         val response = mockMvcResult.response.contentAsString
         val order = objectMapper.readValue(response, Order::class.java)
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/orders/${order.id}")
-            .header("Authorization", "Bearer $jwtUser"))
+        mockMvc.perform(
+            MockMvcRequestBuilders.delete("/api/v1/orders/${order.id}")
+                .cookie(Cookie("access_token", cookieUser))
+        )
             .andExpect(status().isNoContent)
 
         assertEquals(0, orderRepository.count())
         assertEquals(0, orderDetailsRepository.count())
     }
-    
+
     @Test
     fun deleteOrderByIdWhenUserIsNotCreatorShouldReturnForbidden() {
         val orderDetailsDTO = listOf(
@@ -433,18 +482,22 @@ class OrderControllerImplTest(
 
         val orderJson = objectMapper.writeValueAsString(orderDTO)
 
-        val mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/orders")
-                    .contentType("application/json")
-                    .content(orderJson)
-                    .header("Authorization", "Bearer $jwtUser"))
+        val mockMvcResult = mockMvc.perform(
+            MockMvcRequestBuilders.post("/api/v1/orders")
+                .contentType("application/json")
+                .content(orderJson)
+                .cookie(Cookie("access_token", cookieUser))
+        )
             .andExpect(status().isCreated)
             .andReturn()
 
         val response = mockMvcResult.response.contentAsString
         val order = objectMapper.readValue(response, Order::class.java)
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/orders/${order.id}")
-            .header("Authorization", "Bearer $jwtUser2"))
+        mockMvc.perform(
+            MockMvcRequestBuilders.delete("/api/v1/orders/${order.id}")
+                .cookie(Cookie("access_token", cookieUser2))
+        )
             .andExpect(status().isForbidden)
 
         assertEquals(1, orderRepository.count())
@@ -462,18 +515,22 @@ class OrderControllerImplTest(
 
         val orderJson = objectMapper.writeValueAsString(orderDTO)
 
-        val mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/orders")
-                    .contentType("application/json")
-                    .content(orderJson)
-                    .header("Authorization", "Bearer $jwtUser"))
+        val mockMvcResult = mockMvc.perform(
+            MockMvcRequestBuilders.post("/api/v1/orders")
+                .contentType("application/json")
+                .content(orderJson)
+                .cookie(Cookie("access_token", cookieUser))
+        )
             .andExpect(status().isCreated)
             .andReturn()
 
         val response = mockMvcResult.response.contentAsString
         val order = objectMapper.readValue(response, Order::class.java)
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/orders/${order.id}")
-            .header("Authorization", "Bearer $jwtAdmin"))
+        mockMvc.perform(
+            MockMvcRequestBuilders.delete("/api/v1/orders/${order.id}")
+                .cookie(Cookie("access_token", cookieAdmin))
+        )
             .andExpect(status().isNoContent)
 
         assertEquals(0, orderRepository.count())
@@ -491,23 +548,27 @@ class OrderControllerImplTest(
 
         val orderJson = objectMapper.writeValueAsString(orderDTO)
 
-        val mockMvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/orders")
-                    .contentType("application/json")
-                    .content(orderJson)
-                    .header("Authorization", "Bearer $jwtUser"))
+        val mockMvcResult = mockMvc.perform(
+            MockMvcRequestBuilders.post("/api/v1/orders")
+                .contentType("application/json")
+                .content(orderJson)
+                .cookie(Cookie("access_token", cookieUser))
+        )
             .andExpect(status().isCreated)
             .andReturn()
 
         val response = mockMvcResult.response.contentAsString
         val order = objectMapper.readValue(response, Order::class.java)
 
-        val addProductDTO = OrderDTO(listOf( OrderDetailsDTO(product3.id, 5)))
+        val addProductDTO = OrderDTO(listOf(OrderDetailsDTO(product3.id, 5)))
         val addProductJson = objectMapper.writeValueAsString(addProductDTO)
 
-        val updatedMvcResult = mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/orders/${order.id}")
-                    .contentType("application/json")
-                    .content(addProductJson)
-                    .header("Authorization", "Bearer $jwtUser"))
+        val updatedMvcResult = mockMvc.perform(
+            MockMvcRequestBuilders.put("/api/v1/orders/${order.id}")
+                .contentType("application/json")
+                .content(addProductJson)
+                .cookie(Cookie("access_token", cookieUser))
+        )
             .andExpect(status().isOk)
             .andReturn()
 
@@ -519,7 +580,7 @@ class OrderControllerImplTest(
         assertEquals(3, updatedOrder.orderDetails.size)
 
         val listorder = orderRepository.findById(order.id).get()
-        listorder.orderDetails.forEach{
+        listorder.orderDetails.forEach {
             assertEquals(it.order.id, updatedOrder.id)
         }
     }
