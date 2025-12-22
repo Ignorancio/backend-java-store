@@ -1,8 +1,11 @@
 package com.example.store.order.application;
 
-import com.example.store.order.domain.*;
+import com.example.store.order.domain.Order;
+import com.example.store.order.domain.OrderDetails;
+import com.example.store.order.domain.OrderRepository;
 import com.example.store.product.domain.Product;
 import com.example.store.product.domain.ProductRepository;
+import com.example.store.shared.domain.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,9 +41,9 @@ public class OrderServiceImpl implements OrderService {
         for (OrderDetails orderDetails : order.getOrderDetails()) {
             Product product = productMap.get(orderDetails.getProduct().getId());
             if (product == null) {
-                throw new IllegalArgumentException("Product no encontrado");
+                throw new ResourceNotFoundException("Product no encontrado");
             }
-            if(product.getStock() < orderDetails.getQuantity()) {
+            if (product.getStock() < orderDetails.getQuantity()) {
                 throw new IllegalStateException("Stock insuficiente");
             }
             orderDetails.setProduct(product);
@@ -58,7 +61,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     public Order findById(Long id) {
-        return orderRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Order no encontrado"));
+        return orderRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Order no encontrado"));
     }
 
     public List<Order> findAll() {
@@ -71,25 +74,23 @@ public class OrderServiceImpl implements OrderService {
 
     @Transactional
     public void delete(Long id) {
-        orderRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Order no encontrado"));
+        orderRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Order no encontrado"));
         orderRepository.deleteById(id);
     }
 
     @Transactional
     public Order addOrderDetails(Long orderId, List<OrderDetails> orderDetailsList) {
-        Order order = orderRepository.findById(orderId).orElseThrow(() -> new IllegalArgumentException("Order no encontrado"));
-        if(!order.getStatus().equals("PENDING")) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new ResourceNotFoundException("Order no encontrado"));
+        if (!order.getStatus().equals("PENDING")) {
             throw new IllegalStateException("No se puede agregar mas productos a la orden");
         }
         orderDetailsList.forEach(orderDetails -> {
-                Product product = productRepository.findById(orderDetails.getProduct().getId()).orElseThrow(() -> new IllegalArgumentException("Product no encontrado"));
-                orderDetails.setProduct(product);
-                orderDetails.setPrice(product.getPrice());
-                order.setTotal(order.getTotal() + orderDetails.getQuantity()*product.getPrice());
-                order.getOrderDetails().add(orderDetails);
-//                orderDetailsRepository.save(orderDetails);
-            });
-        System.out.println(order);
+            Product product = productRepository.findById(orderDetails.getProduct().getId()).orElseThrow(() -> new ResourceNotFoundException("Product no encontrado"));
+            orderDetails.setProduct(product);
+            orderDetails.setPrice(product.getPrice());
+            order.setTotal(order.getTotal() + orderDetails.getQuantity() * product.getPrice());
+            order.getOrderDetails().add(orderDetails);
+        });
         return orderRepository.save(order);
     }
 }
