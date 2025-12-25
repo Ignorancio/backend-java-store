@@ -6,6 +6,7 @@ import com.example.store.order.domain.OrderDetails
 import com.example.store.order.domain.OrderRepository
 import com.example.store.product.domain.Product
 import com.example.store.product.domain.ProductRepository
+import com.example.store.shared.domain.exception.ResourceNotFoundException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -22,6 +23,7 @@ class OrderServiceTest {
 
     @Mock
     private lateinit var orderRepository: OrderRepository
+
     @Mock
     private lateinit var productRepository: ProductRepository
 
@@ -34,20 +36,24 @@ class OrderServiceTest {
     }
 
     @Test
-    fun saveOrderWhenProductIdNoExistShouldReturnThrowIllegalArgumentException() {
+    fun saveOrderWhenProductIdNoExistShouldReturnThrowResourceNotFoundException() {
 
-        //These are the data that should come from the controller
         val order = Order.builder()
-            .orderDetails(listOf(
-                OrderDetails.builder().product(Product.builder().id(1).build()).quantity(10).build(),
-                OrderDetails.builder().product(Product.builder().id(2).build()).quantity(15).build()))
+            .orderDetails(
+                listOf(
+                    OrderDetails.builder().product(Product.builder().id(1).build()).quantity(10).build(),
+                    OrderDetails.builder().product(Product.builder().id(2).build()).quantity(15).build()
+                )
+            )
             .build()
 
-        Mockito.`when`(productRepository.findAllById(listOf(1L,2L))).thenReturn(listOf(
-            Product(1, "Product 1", "Description 1", 10.0, 10, Category(1, "Category 1"), null),
-            ))
+        Mockito.`when`(productRepository.findAllById(listOf(1L, 2L))).thenReturn(
+            listOf(
+                Product(1, "Product 1", "Description 1", 10.0, 10, Category(1, "Category 1"), null),
+            )
+        )
 
-        val exception = assertThrows<IllegalArgumentException> {
+        val exception = assertThrows<ResourceNotFoundException> {
             orderService.save(order)
         }
         assertEquals("Product no encontrado", exception.message)
@@ -59,15 +65,20 @@ class OrderServiceTest {
 
         //These are the data that should come from the controller
         val order = Order.builder()
-            .orderDetails(listOf(
-                OrderDetails.builder().product(Product.builder().id(1).build()).quantity(10).build(),
-                OrderDetails.builder().product(Product.builder().id(2).build()).quantity(15).build()))
+            .orderDetails(
+                listOf(
+                    OrderDetails.builder().product(Product.builder().id(1).build()).quantity(10).build(),
+                    OrderDetails.builder().product(Product.builder().id(2).build()).quantity(15).build()
+                )
+            )
             .build()
 
-        Mockito.`when`(productRepository.findAllById(listOf(1L,2L))).thenReturn(listOf(
-            Product(1, "Product 1", "Description 1", 10.0, 5, Category(1, "Category 1"), null),
-            Product(2, "Product 2", "Description 2", 20.0, 15, Category(2, "Category 2"), null)
-        ))
+        Mockito.`when`(productRepository.findAllById(listOf(1L, 2L))).thenReturn(
+            listOf(
+                Product(1, "Product 1", "Description 1", 10.0, 5, Category(1, "Category 1"), null),
+                Product(2, "Product 2", "Description 2", 20.0, 15, Category(2, "Category 2"), null)
+            )
+        )
 
         val exception = assertThrows<IllegalStateException> {
             orderService.save(order)
@@ -77,14 +88,14 @@ class OrderServiceTest {
     }
 
     @Test
-    fun findByIdWhenOrderIdNoExistShouldReturnThrowIllegalArgumentException() {
+    fun findByIdWhenOrderIdNoExistShouldReturnThrowResourceNotFoundException() {
 
         //These are the data that should come from the controller
         val orderId = 1L
 
         Mockito.`when`(orderRepository.findById(1L)).thenReturn(Optional.empty())
 
-        val exception = assertThrows<IllegalArgumentException> {
+        val exception = assertThrows<ResourceNotFoundException> {
             orderService.findById(orderId)
         }
         assertEquals("Order no encontrado", exception.message)
@@ -97,14 +108,19 @@ class OrderServiceTest {
         //These are the data that should come from the controller
         val orderId = 1L
 
-        Mockito.`when`(orderRepository.findById(1L)).thenReturn(Optional.of(
-            Order.builder()
-                .id(1)
-                .orderDetails(listOf(
-                    OrderDetails.builder().product(Product.builder().id(1).build()).quantity(10).build(),
-                    OrderDetails.builder().product(Product.builder().id(2).build()).quantity(15).build()))
-                .build()
-        ))
+        Mockito.`when`(orderRepository.findById(1L)).thenReturn(
+            Optional.of(
+                Order.builder()
+                    .id(1)
+                    .orderDetails(
+                        listOf(
+                            OrderDetails.builder().product(Product.builder().id(1).build()).quantity(10).build(),
+                            OrderDetails.builder().product(Product.builder().id(2).build()).quantity(15).build()
+                        )
+                    )
+                    .build()
+            )
+        )
 
         val order = orderService.findById(orderId)
 

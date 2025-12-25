@@ -223,7 +223,7 @@ class OrderControllerImplTest(
     }
 
     @Test
-    fun saveWhenProductIdDoesNotExistShouldReturnBadRequest() {
+    fun saveWhenProductIdDoesNotExistShouldReturnNotFound() {
         val orderDetailsDTO = listOf(
             OrderDetailsDTO(product1.id + 3, 10),
             OrderDetailsDTO(product2.id, 15),
@@ -239,7 +239,7 @@ class OrderControllerImplTest(
                 .content(orderJson)
                 .cookie(Cookie("access_token", cookieUser))
         )
-            .andExpect(status().isBadRequest)
+            .andExpect(status().isNotFound)
 
         assertEquals(0, orderRepository.count())
         assertEquals(0, orderDetailsRepository.count())
@@ -355,6 +355,17 @@ class OrderControllerImplTest(
                 .cookie(Cookie("access_token", cookieAdmin))
         )
             .andExpect(status().isOk)
+    }
+
+    @Test
+    fun findOrderByIdWhenIdDoesNotExistShouldReturnNotFound() {
+        val nonExistentId = 999999L
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/v1/orders/$nonExistentId")
+                .cookie(Cookie("access_token", cookieUser))
+        )
+            .andExpect(status().isNotFound)
     }
 
     @Test
@@ -583,5 +594,34 @@ class OrderControllerImplTest(
         listorder.orderDetails.forEach {
             assertEquals(it.order.id, updatedOrder.id)
         }
+    }
+
+    @Test
+    fun addProductToOrderWhenUserIsNotCreatorShouldReturnForbidden() {
+        val orderDetailsDTO = listOf(OrderDetailsDTO(product1.id, 10))
+        val orderDTO = OrderDTO(orderDetailsDTO)
+        val orderJson = objectMapper.writeValueAsString(orderDTO)
+
+        val mvcResult = mockMvc.perform(
+            MockMvcRequestBuilders.post("/api/v1/orders")
+                .contentType("application/json")
+                .content(orderJson)
+                .cookie(Cookie("access_token", cookieUser))
+        )
+            .andExpect(status().isCreated)
+            .andReturn()
+
+        val order = objectMapper.readValue(mvcResult.response.contentAsString, Order::class.java)
+
+        val addProductDTO = OrderDTO(listOf(OrderDetailsDTO(product3.id, 5)))
+        val addProductJson = objectMapper.writeValueAsString(addProductDTO)
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.put("/api/v1/orders/${order.id}")
+                .contentType("application/json")
+                .content(addProductJson)
+                .cookie(Cookie("access_token", cookieUser2))
+        )
+            .andExpect(status().isForbidden)
     }
 }
