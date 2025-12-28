@@ -19,10 +19,11 @@ import org.springframework.web.multipart.MultipartFile;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(MockitoExtension.class)
-public class ProductServiceTest {
+class ProductServiceTest {
 
     @Mock
     private ProductRepository queryProductRepository;
@@ -49,7 +50,7 @@ public class ProductServiceTest {
 
     @Test
     void save() {
-        MultipartFile MULTIPART_FILE_PREPARED = new MockMultipartFile("test.jpg","test.jpg".getBytes(StandardCharsets.UTF_8));
+        MultipartFile MULTIPART_FILE_PREPARED = new MockMultipartFile("test.jpg", "test.jpg".getBytes(StandardCharsets.UTF_8));
 
         Product PRODUCT_BASE_PREPARED = Product.builder()
                 .id(null)
@@ -72,7 +73,7 @@ public class ProductServiceTest {
                 .build();
 
         Mockito.when(categoryRepository.save(PRODUCT_BASE_PREPARED.getCategory())).thenReturn(Category.builder().id(1L).name(PRODUCT_BASE_PREPARED.getCategory().getName()).build());
-        Mockito.when(fileUpload.uploadFile("/images",MULTIPART_FILE_PREPARED)).thenReturn("test.jpg");
+        Mockito.when(fileUpload.uploadFile("/images", MULTIPART_FILE_PREPARED)).thenReturn("test.jpg");
         Mockito.when(queryProductRepository.save(PRODUCT_BASE_PREPARED)).thenReturn(PRODUCT_SAVED_PREPARED);
 
         Product product = productService.save(PRODUCT_BASE_PREPARED, MULTIPART_FILE_PREPARED);
@@ -88,7 +89,7 @@ public class ProductServiceTest {
     }
 
     @Test
-    void findAll(){
+    void findAll() {
         Product PRODUCT_SAVED_PREPARED = Product.builder()
                 .id(1L)
                 .name("Product 1")
