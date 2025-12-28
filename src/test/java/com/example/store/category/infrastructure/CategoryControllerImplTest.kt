@@ -9,10 +9,10 @@ import com.example.store.user.infrastructure.repository.QueryUserRepository
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.http.Cookie
 import org.junit.jupiter.api.*
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.TestConstructor
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -24,11 +24,12 @@ import kotlin.test.assertNotNull
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 class CategoryControllerImplTest(
-    @Autowired private val mockMvc: MockMvc,
-    @Autowired private val productRepository: QueryProductRepository,
-    @Autowired private val categoryRepository: QueryCategoryRepository,
-    @Autowired private val userRepository: QueryUserRepository
+    private val mockMvc: MockMvc,
+    private val productRepository: QueryProductRepository,
+    private val categoryRepository: QueryCategoryRepository,
+    private val userRepository: QueryUserRepository
 ) {
     private lateinit var cookieAdmin: String
 

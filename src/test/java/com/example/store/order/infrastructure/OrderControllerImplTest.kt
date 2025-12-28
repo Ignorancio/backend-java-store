@@ -16,10 +16,10 @@ import jakarta.servlet.http.Cookie
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.TestConstructor
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -28,13 +28,14 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 class OrderControllerImplTest(
-    @Autowired private val mockMvc: MockMvc,
-    @Autowired private val productRepository: QueryProductRepository,
-    @Autowired private val orderRepository: QueryOrderRepository,
-    @Autowired private val orderDetailsRepository: QueryOrderDetailsRepository,
-    @Autowired private val userRepository: QueryUserRepository,
-    @Autowired private val productMapper: ProductMapper
+    private val mockMvc: MockMvc,
+    private val productRepository: QueryProductRepository,
+    private val orderRepository: QueryOrderRepository,
+    private val orderDetailsRepository: QueryOrderDetailsRepository,
+    private val userRepository: QueryUserRepository,
+    private val productMapper: ProductMapper
 ) {
     private lateinit var cookieUser: String
     private lateinit var cookieUser2: String
