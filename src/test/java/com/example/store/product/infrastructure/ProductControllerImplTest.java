@@ -316,7 +316,7 @@ class ProductControllerImplTest {
                 .andExpect(status().isNoContent());
 
         mockMvc.perform(get("/api/v1/products/" + product.getId().toString()))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotFound());
 
         assertEquals(0, productRepository.count());
         assertEquals(0, productImageRepository.count());
