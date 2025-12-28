@@ -10,7 +10,9 @@ public interface CategoryRepository {
 
     List<Category> findAll();
 
-    Boolean existsByName(String name);
+    boolean existsByName(String name);
+
+    boolean existsById(Long id);
 
     void deleteById(Long id);
 

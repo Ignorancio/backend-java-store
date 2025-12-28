@@ -32,7 +32,7 @@ public class PostgresCategoryRepository implements CategoryRepository {
         return queryCategoryRepository.findAll().stream().map(categoryMapper::categoryEntityToCategory).toList();
     }
 
-    public Boolean existsByName(String name) {
+    public boolean existsByName(String name) {
         return queryCategoryRepository.existsByName(name);
     }
 
@@ -40,7 +40,11 @@ public class PostgresCategoryRepository implements CategoryRepository {
         queryCategoryRepository.deleteById(id);
     }
 
-    public Optional<Category> findByName(String name){
+    public Optional<Category> findByName(String name) {
         return queryCategoryRepository.findByName(name).map(categoryMapper::categoryEntityToCategory);
+    }
+
+    public boolean existsById(Long id) {
+        return queryCategoryRepository.existsById(id);
     }
 }
