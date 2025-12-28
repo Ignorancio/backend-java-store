@@ -1,6 +1,7 @@
 package com.example.store.config.infrastructure.filter;
 
 import com.example.store.config.application.JwtService;
+import com.example.store.shared.domain.exception.ResourceNotFoundException;
 import com.example.store.user.domain.User;
 import com.example.store.user.infrastructure.entity.UserEntity;
 import com.example.store.user.infrastructure.mapper.UserMapper;
@@ -61,7 +62,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 filterChain.doFilter(request, response);
                 return;
             }
-            final UserEntity user = userRepository.findById(UUID.fromString(id)).orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+            final UserEntity user = userRepository.findById(UUID.fromString(id)).orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
             final User user1 = userMapper.userEntityToUser(user);
 

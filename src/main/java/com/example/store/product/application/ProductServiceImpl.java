@@ -2,7 +2,11 @@ package com.example.store.product.application;
 
 import com.example.store.category.domain.Category;
 import com.example.store.category.domain.CategoryRepository;
-import com.example.store.product.domain.*;
+import com.example.store.product.domain.Product;
+import com.example.store.product.domain.ProductImage;
+import com.example.store.product.domain.ProductImageRepository;
+import com.example.store.product.domain.ProductRepository;
+import com.example.store.shared.domain.exception.ResourceNotFoundException;
 import com.example.store.util.FileUpload;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -34,11 +38,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     public Product findById(Long id) {
-        return queryProductRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
+        return queryProductRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
     }
 
     public Product update(Product product, Optional<MultipartFile> file) {
-        Product productdb = queryProductRepository.findById(product.getId()).orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
+        Product productdb = queryProductRepository.findById(product.getId()).orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
         productUtils.copyNonNullProperties(product, productdb);
         productdb.setCategory(findOrSaveCategory(productdb.getCategory()));
         if (file.isPresent() && file.get().getOriginalFilename() != null) {
@@ -50,7 +54,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     public void deleteById(Long id) {
-        queryProductRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
+        queryProductRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
         queryProductRepository.deleteById(id);
     }
 

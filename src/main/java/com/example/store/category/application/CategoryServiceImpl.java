@@ -2,6 +2,7 @@ package com.example.store.category.application;
 
 import com.example.store.category.domain.Category;
 import com.example.store.category.domain.CategoryRepository;
+import com.example.store.shared.domain.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,16 +26,18 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     public Category findById(Long id) {
-        return categoryRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Categoria no encontrada"));
+        return categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Categoria no encontrada"));
     }
 
     public Category update(Category category) {
-        Category categorySearch = categoryRepository.findById(category.getId()).orElseThrow(() -> new IllegalArgumentException("Categoria no encontrada"));
+        if (!categoryRepository.existsById(category.getId())) {
+            throw new ResourceNotFoundException("Categoria no encontrada");
+        }
         return categoryRepository.save(category);
     }
 
     public void deleteById(Long id) {
-        categoryRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Categoria no encontrada"));
+        categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Categoria no encontrada"));
         categoryRepository.deleteById(id);
     }
 }

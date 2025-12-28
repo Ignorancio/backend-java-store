@@ -2,6 +2,7 @@ package com.example.store.product.application;
 
 import com.example.store.product.domain.Product;
 import com.example.store.product.infrastructure.repository.implementation.ProductRepositoryImplV2;
+import com.example.store.shared.domain.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -30,7 +31,7 @@ public class ProductServiceImplV2 {
     public Resource findImageByName(String name) {
         Path imagePath = Paths.get("public/images", name);
         if (!imagePath.toFile().exists()) {
-            throw new IllegalArgumentException("Image not found: " + name);
+            throw new ResourceNotFoundException("Image not found: " + name);
         }
         try {
             return new UrlResource(imagePath.toUri());

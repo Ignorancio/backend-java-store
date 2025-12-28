@@ -4,6 +4,7 @@ import com.example.store.auth.infrastructure.AuthRequest;
 import com.example.store.auth.infrastructure.RegisterRequest;
 import com.example.store.auth.infrastructure.TokenResponse;
 import com.example.store.config.application.JwtService;
+import com.example.store.shared.domain.exception.ResourceNotFoundException;
 import com.example.store.user.domain.Role;
 import com.example.store.user.domain.User;
 import com.example.store.user.domain.UserRepository;
@@ -45,7 +46,7 @@ public class AuthService {
 
     public TokenResponse authenticate(final AuthRequest request) {
         final User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new IllegalArgumentException("Usuario no existe"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no existe"));
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -66,7 +67,7 @@ public class AuthService {
         if (username == null) {
             throw new IllegalArgumentException("Invalid token");
         }
-        final User user = this.userRepository.findByEmail(username).orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+        final User user = this.userRepository.findByEmail(username).orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
         final boolean isTokenValid = jwtService.isTokenValid(refreshToken, user);
         if (!isTokenValid) {
             throw new IllegalArgumentException("Invalid token");

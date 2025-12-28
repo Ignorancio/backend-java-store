@@ -1,5 +1,6 @@
 package com.example.store.user.application;
 
+import com.example.store.shared.domain.exception.ResourceNotFoundException;
 import com.example.store.user.domain.User;
 import com.example.store.user.domain.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,7 @@ public class UserServiceImpl implements UserService {
 
     public User update(User updateUser) {
 
-        User user = userRepository.findById(updateUser.getId()).orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+        User user = userRepository.findById(updateUser.getId()).orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
         BeanUtils.copyProperties(updateUser, user, "role");
 
@@ -29,7 +30,7 @@ public class UserServiceImpl implements UserService {
     }
 
     public User findById(UUID id) {
-        return userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+        return userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
     }
 
     public void delete(UUID id) {
